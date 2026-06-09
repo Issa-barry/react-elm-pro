@@ -37,7 +37,7 @@ export default function ConditionsScreen() {
           • Nom, prénom{'\n'}
           • Numéro de téléphone{'\n'}
           • Adresse e-mail{'\n'}
-          • Données de géolocalisation (uniquement lors de livraisons actives){'\n'}
+          • Données de géolocalisation (pour les opérations de terrain){'\n'}
           • Données de connexion et d'utilisation (logs, horodatages){'\n\n'}
           Ces données sont nécessaires à l'exécution du contrat de service entre vous et Eau la maman.
         </Section>
@@ -45,8 +45,7 @@ export default function ConditionsScreen() {
         <Section title="3. Finalités du traitement" styles={styles}>
           Vos données sont utilisées pour :{'\n\n'}
           • Gérer votre compte et authentifier votre accès{'\n'}
-          • Coordonner les livraisons et la logistique{'\n'}
-          • Calculer et verser vos commissions{'\n'}
+          • Coordonner la logistique et les opérations back-office{'\n'}
           • Vous envoyer des notifications relatives à votre activité{'\n'}
           • Améliorer nos services
         </Section>
@@ -70,7 +69,7 @@ export default function ConditionsScreen() {
         </Section>
 
         <Section title="7. Notifications push" styles={styles}>
-          Avec votre accord, nous envoyons des notifications push sur votre appareil pour vous informer de l'état de vos livraisons et paiements. Vous pouvez désactiver ces notifications à tout moment dans les paramètres de l'application ou de votre appareil.
+          Avec votre accord, nous envoyons des notifications push sur votre appareil pour vous informer des événements opérationnels. Vous pouvez désactiver ces notifications à tout moment dans les paramètres de l'application ou de votre appareil.
         </Section>
 
         <Section title="8. Modifications" styles={styles}>

@@ -77,9 +77,6 @@ function ThemedApp() {
         <Stack.Screen name="(tabs)"              options={{ headerShown: false }} />
         <Stack.Screen name="modal"               options={{ presentation: 'modal' }} />
         <Stack.Screen name="scan"                options={{ headerShown: false, presentation: 'fullScreenModal' }} />
-        <Stack.Screen name="vehicule/[id]"       options={{ headerBackTitle: 'Retour', ...headerScreenOptions }} />
-        <Stack.Screen name="vehicule/frais/[id]" options={{ headerBackTitle: 'Retour', ...headerScreenOptions }} />
-        <Stack.Screen name="vehicule/proposer"   options={{ title: 'Proposer un véhicule', headerBackTitle: 'Retour', ...headerScreenOptions }} />
         <Stack.Screen name="profil/index"         options={{ headerShown: false }} />
         <Stack.Screen name="profil/modifier"      options={{ headerShown: false }} />
         <Stack.Screen name="profil/mot-de-passe"  options={{ headerShown: false }} />

@@ -15,9 +15,30 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useCurrentUser } from '@/features/auth/hooks/useCurrentUser';
-import { envoyerMessage } from '@/features/contact/services/contact-api.service';
+import { secureStorage } from '@/features/auth/services/secure-storage.service';
 import { useTheme } from '@/shared/contexts/ThemeContext';
 import type { Colors } from '@/shared/constants/theme';
+
+const API_URL = process.env.EXPO_PUBLIC_API_URL ?? '';
+
+async function envoyerMessage(message: string): Promise<{ ok: boolean; error?: string }> {
+  try {
+    const token = await secureStorage.getToken();
+    const res = await fetch(`${API_URL}/api/v1/mobile/contact`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify({ message }),
+    });
+    const data = await res.json();
+    if (!res.ok) return { ok: false, error: data.message ?? 'Une erreur est survenue.' };
+    return { ok: true };
+  } catch {
+    return { ok: false, error: 'Erreur réseau. Vérifiez votre connexion.' };
+  }
+}
 
 // Numéro provisoire — à remplacer dès confirmation
 const SUPPORT_PHONE = '+224 6XX XX XXxxxx';

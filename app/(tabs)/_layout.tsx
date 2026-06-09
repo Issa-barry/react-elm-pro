@@ -8,12 +8,8 @@ function IconAccueil({ color }: Readonly<{ color: string }>) {
   return <IconSymbol size={28} name="house.fill" color={color} />;
 }
 
-function IconLivraisons({ color }: Readonly<{ color: string }>) {
-  return <IconSymbol size={28} name="shippingbox.fill" color={color} />;
-}
-
-function IconVehicules({ color }: Readonly<{ color: string }>) {
-  return <IconSymbol size={28} name="car.fill" color={color} />;
+function IconNotifications({ color }: Readonly<{ color: string }>) {
+  return <IconSymbol size={28} name="bell.fill" color={color} />;
 }
 
 export default function TabLayout() {
@@ -34,19 +30,12 @@ export default function TabLayout() {
       }}>
       <Tabs.Screen
         name="index"
-        options={{ title: 'Accueil',    tabBarIcon: IconAccueil }}
+        options={{ title: 'Accueil', tabBarIcon: IconAccueil }}
       />
       <Tabs.Screen
-        name="livraisons"
-        options={{ title: 'Livraisons', tabBarIcon: IconLivraisons }}
+        name="notifications"
+        options={{ title: 'Notifications', tabBarIcon: IconNotifications }}
       />
-      <Tabs.Screen
-        name="vehicules"
-        options={{ title: 'Véhicules', tabBarIcon: IconVehicules }}
-      />
-      {/* notifications et gains restent comme routes mais masqués de la barre */}
-      <Tabs.Screen name="notifications" options={{ href: null }} />
-      <Tabs.Screen name="gains"         options={{ href: null }} />
     </Tabs>
   );
 }

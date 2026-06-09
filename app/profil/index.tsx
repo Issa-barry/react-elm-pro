@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import {
   ScrollView,
   StyleSheet,
@@ -46,27 +46,6 @@ function SectionItem({
   );
 }
 
-function InfoItem({
-  icon,
-  label,
-  colors,
-  styles,
-}: Readonly<{
-  icon: React.ComponentProps<typeof Ionicons>['name'];
-  label: string;
-  colors: ThemeColors;
-  styles: ReturnType<typeof makeStyles>;
-}>) {
-  return (
-    <View style={styles.item}>
-      <View style={[styles.itemIcon, { backgroundColor: colors.primaryLight }]}>
-        <Ionicons name={icon} size={18} color={colors.primary} />
-      </View>
-      <Text style={styles.itemLabel}>{label}</Text>
-    </View>
-  );
-}
-
 // ── Page principale ───────────────────────────────────────────────────────────
 
 export default function ProfilScreen() {
@@ -106,14 +85,6 @@ export default function ProfilScreen() {
         <View style={styles.card}>
           <SectionItem icon="lock-closed-outline" label="Modifier le profil"
             onPress={() => router.push('/profil/modifier')} colors={colors} styles={styles} />
-        </View>
-
-        {/* Services */}
-        <Text style={styles.sectionTitle}>Services</Text>
-        <View style={styles.card}>
-          <InfoItem icon="cube-outline" label="Livraisons" colors={colors} styles={styles} />
-          <View style={styles.divider} />
-          <InfoItem icon="car-outline" label="Véhicules" colors={colors} styles={styles} />
         </View>
 
         {/* Sécurité */}

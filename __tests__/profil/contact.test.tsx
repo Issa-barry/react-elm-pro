@@ -37,10 +37,13 @@ jest.mock('@/features/auth/hooks/useCurrentUser', () => ({
   }),
 }));
 
-const mockEnvoyerMessage = jest.fn();
-jest.mock('@/features/contact/services/contact-api.service', () => ({
-  envoyerMessage: (...args: unknown[]) => mockEnvoyerMessage(...args),
+// mock secureStorage used by the inlined envoyerMessage in profil/contact.tsx
+jest.mock('@/features/auth/services/secure-storage.service', () => ({
+  secureStorage: { getToken: jest.fn().mockResolvedValue('tok-test') },
 }));
+
+const mockFetch = jest.fn();
+global.fetch = mockFetch;
 
 import ContactScreen from '../../app/profil/contact';
 
@@ -50,7 +53,11 @@ describe('ContactScreen', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.spyOn(Alert, 'alert').mockImplementation(() => {});
-    mockEnvoyerMessage.mockResolvedValue({ ok: true });
+    // Default: successful send
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({}),
+    });
   });
 
   afterEach(() => {
@@ -68,7 +75,7 @@ describe('ContactScreen', () => {
     const btn = screen.getByText('Envoyer le message');
     expect(btn).toBeTruthy();
     fireEvent.press(btn);
-    expect(mockEnvoyerMessage).not.toHaveBeenCalled();
+    expect(mockFetch).not.toHaveBeenCalled();
   });
 
   it('envoie le message et affiche une alerte de succès', async () => {
@@ -79,13 +86,16 @@ describe('ContactScreen', () => {
     fireEvent.press(screen.getByText('Envoyer le message'));
 
     await waitFor(() => {
-      expect(mockEnvoyerMessage).toHaveBeenCalledWith('Bonjour, j\'ai un problème.');
+      expect(mockFetch).toHaveBeenCalled();
       expect(Alert.alert).toHaveBeenCalledWith('Message envoyé', expect.any(String), expect.any(Array));
     });
   });
 
   it("affiche une alerte d'erreur si l'envoi échoue", async () => {
-    mockEnvoyerMessage.mockResolvedValue({ ok: false, error: 'Erreur réseau.' });
+    mockFetch.mockResolvedValue({
+      ok: false,
+      json: async () => ({ message: 'Erreur réseau.' }),
+    });
     render(<ContactScreen />);
 
     const input = screen.getByPlaceholderText(/Décrivez votre demande/i);

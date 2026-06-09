@@ -21,8 +21,8 @@ export async function registerPushNotifications(): Promise<void> {
   if (!Device.isDevice) return;
 
   if (Platform.OS === 'android') {
-    await Notifications.setNotificationChannelAsync('livraisons', {
-      name: 'Livraisons',
+    await Notifications.setNotificationChannelAsync('general', {
+      name: 'Général',
       importance: Notifications.AndroidImportance.MAX,
       vibrationPattern: [0, 250, 250, 250],
       lightColor: '#2563EB',
