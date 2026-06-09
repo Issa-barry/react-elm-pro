@@ -12,6 +12,9 @@ import { getInitiales } from '@/shared/utils/initiales';
 import { COUNTRIES } from '@/features/auth/types/auth.types';
 import { fetchNotifications } from '@/features/notifications/services/notifications-api.service';
 import { useQrPayload } from '../hooks/useQrPayload';
+import { useStats } from '../hooks/useStats';
+import StatsCarousel from '../components/StatsCarousel';
+import BusinessGrid from '../components/BusinessGrid';
 
 const QR_SIZE            = 90;
 const QR_ZOOM_SIZE       = 240;
@@ -46,6 +49,7 @@ export default function AccueilScreen() {
   const appStateRef = useRef(AppState.currentState);
   const scrollRef   = useRef<ScrollView>(null);
   const { qrPayload, site, loading: qrLoading, load: loadQr } = useQrPayload();
+  const { stats, loading: statsLoading, load: loadStats } = useStats();
 
   const styles  = useMemo(() => makeStyles(colors), [colors]);
   const nom      = user ? `${user.prenom} ${user.nom}` : '';
@@ -53,7 +57,7 @@ export default function AccueilScreen() {
   const qrData   = qrPayload ?? user?.id ?? 'elm-pro';
   const initiales = getInitiales(user?.prenom, user?.nom);
 
-  useEffect(() => { loadQr(); }, [loadQr]);
+  useEffect(() => { loadQr(); loadStats(); }, [loadQr, loadStats]);
 
   const pollNotifs = useCallback(async () => {
     try {
@@ -64,7 +68,7 @@ export default function AccueilScreen() {
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await Promise.all([loadQr(), pollNotifs()]);
+    await Promise.all([loadQr(), loadStats(), pollNotifs()]);
     setRefreshing(false);
   }, [loadQr, pollNotifs]);
 
@@ -173,6 +177,15 @@ export default function AccueilScreen() {
         }
       </View>
 
+      {/* Cartes statistiques */}
+      <View style={styles.carouselSection}>
+        <StatsCarousel stats={stats} loading={statsLoading} />
+      </View>
+
+      {/* Grille des objets métier */}
+      <View style={styles.gridSection}>
+        <BusinessGrid />
+      </View>
 
     </ScrollView>
   );
@@ -238,7 +251,9 @@ function makeStyles(colors: typeof Colors) {
       elevation: 12,
     },
     modalHint:  { fontSize: 12, color: colors.textMuted },
-    userSection: { alignItems: 'center', paddingHorizontal: 24, gap: 6 },
+    userSection:    { alignItems: 'center', paddingHorizontal: 24, gap: 6 },
+    carouselSection: { marginTop: 28 },
+    gridSection:     { marginTop: 28 },
     name:        { fontSize: 24, fontWeight: '700', color: colors.text, textAlign: 'center' },
     phone:       { fontSize: 15, color: colors.textMuted, textAlign: 'center' },
     siteBadge: {

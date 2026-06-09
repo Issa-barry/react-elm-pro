@@ -19,6 +19,13 @@ const MAPPING = {
   'bell.fill': 'notifications',
   'moon.fill': 'nightlight-round',
   'sun.max.fill': 'wb-sunny',
+  'cart.fill': 'shopping-cart',
+  'person.2.fill': 'people',
+  'cube.fill': 'inventory-2',
+  'building.2.fill': 'location-city',
+  'person.3.fill': 'group',
+  'arrow.left.arrow.right': 'swap-horiz',
+  'mappin.and.ellipse': 'place',
 } as IconMapping;
 
 export function IconSymbol({
