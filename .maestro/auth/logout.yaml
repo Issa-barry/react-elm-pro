@@ -1,0 +1,8 @@
+appId: com.eaulamaman.client
+---
+- runFlow: login.yaml
+
+- scrollTo: "Déconnexion"
+- tapOn: "Déconnexion"
+
+- assertVisible: "Se connecter"

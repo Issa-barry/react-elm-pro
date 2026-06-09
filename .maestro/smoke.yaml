@@ -1,0 +1,13 @@
+appId: com.eaulamaman.client
+---
+- launchApp:
+    clearState: true
+
+# L'app redirige vers login si non authentifié
+- assertVisible:
+    text: "Se connecter"
+    enabled: true
+
+- assertVisible:
+    text: "Créer un compte"
+    enabled: true

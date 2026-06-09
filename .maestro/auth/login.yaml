@@ -1,0 +1,19 @@
+appId: com.eaulamaman.client
+---
+- launchApp:
+    clearState: true
+
+- assertVisible: "Se connecter"
+
+- tapOn:
+    id: "input-email"
+- inputText: "${EMAIL:-test@eaulamaman.com}"
+
+- tapOn:
+    id: "input-password"
+- inputText: "${PASSWORD:-password123}"
+
+- tapOn: "Se connecter"
+
+- assertVisible: "Accueil"
+- assertNotVisible: "Se connecter"

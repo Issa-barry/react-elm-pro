@@ -1,0 +1,36 @@
+name: EAS Build – Production (main)
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build-production:
+    name: Build AAB Production
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Setup Expo & EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: EAS Build – production (Android AAB)
+        run: eas build --profile production --platform android --non-interactive
+
+      # Décommenter pour soumettre automatiquement au Play Store
+      # - name: EAS Submit – Play Store
+      #   run: eas submit --profile production --platform android --non-interactive

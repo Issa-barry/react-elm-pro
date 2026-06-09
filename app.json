@@ -1,0 +1,78 @@
+{
+  "expo": {
+    "name": "Eau la maman",
+    "slug": "eau-la-maman",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "mobile",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "infoPlist": {
+        "LSApplicationQueriesSchemes": [
+          "googlegmail",
+          "ms-outlook",
+          "readdle-spark",
+          "ymail"
+        ]
+      }
+    },
+    "android": {
+      "package": "com.eaulamaman.client",
+      "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE",
+        "foregroundImage": "./assets/images/android-icon-foreground.png",
+        "backgroundImage": "./assets/images/android-icon-background.png",
+        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+      },
+      "edgeToEdgeEnabled": true,
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ]
+    },
+    "web": {
+      "output": "static",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 180,
+          "resizeMode": "contain",
+          "backgroundColor": "#2563eb"
+        }
+      ],
+      "expo-secure-store",
+      [
+        "expo-notifications",
+        {
+          "defaultChannel": "livraisons"
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Autoriser l'accès à la caméra pour scanner les QR codes clients."
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "22377fc4-8804-4e63-a2da-c37723147e16"
+      }
+    },
+    "owner": "ibarry"
+  }
+}
