@@ -1,6 +1,7 @@
-import { ActivityIndicator, AppState, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, AppState, Modal, Pressable, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import QRCode from 'react-native-qrcode-svg';
 import { router, useFocusEffect } from 'expo-router';
 
 import { Colors } from '@/shared/constants/theme';
@@ -9,9 +10,16 @@ import { IconSymbol } from '@/shared/components/ui/icon-symbol';
 import { useCurrentUser } from '@/features/auth/hooks/useCurrentUser';
 import { getInitiales } from '@/shared/utils/initiales';
 import { fetchNotifications } from '@/features/notifications/services/notifications-api.service';
+import { useQrPayload } from '../hooks/useQrPayload';
 import DashboardStats from '../components/DashboardStats';
 
-const HEADER_HEIGHT = 140;
+const QR_SIZE            = 90;
+const QR_ZOOM_SIZE       = 240;
+const QR_WRAPPER_PADDING = 12;
+const QR_OVERLAP         = QR_SIZE / 2;
+const HEADER_HEIGHT      = 140;
+const QR_CARD_HEIGHT     = QR_SIZE + QR_WRAPPER_PADDING * 2;
+const QR_BELOW_HEADER    = QR_CARD_HEIGHT - QR_OVERLAP;
 
 function formatPhone(phone: string): string {
   if (!phone) return '';
@@ -24,16 +32,20 @@ export default function AccueilScreen() {
   const insets = useSafeAreaInsets();
   const { isDark, toggle: toggleTheme, colors } = useTheme();
   const { user, loading: userLoading } = useCurrentUser();
+  const [qrZoomed, setQrZoomed]   = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
-  const [refreshing, setRefreshing] = useState(false);
+  const [refreshing, setRefreshing]   = useState(false);
   const appStateRef = useRef(AppState.currentState);
-  const scrollRef = useRef<ScrollView>(null);
+  const scrollRef   = useRef<ScrollView>(null);
+  const { qrPayload, site, loading: qrLoading, load: loadQr } = useQrPayload();
 
-  const styles = useMemo(() => makeStyles(colors), [colors]);
-
+  const styles  = useMemo(() => makeStyles(colors), [colors]);
   const nom      = user ? `${user.prenom} ${user.nom}` : '';
   const phone    = user?.telephone ?? '';
+  const qrData   = qrPayload ?? user?.id ?? 'elm-pro';
   const initiales = getInitiales(user?.prenom, user?.nom);
+
+  useEffect(() => { loadQr(); }, [loadQr]);
 
   const pollNotifs = useCallback(async () => {
     try {
@@ -44,9 +56,9 @@ export default function AccueilScreen() {
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await pollNotifs();
+    await Promise.all([loadQr(), pollNotifs()]);
     setRefreshing(false);
-  }, [pollNotifs]);
+  }, [loadQr, pollNotifs]);
 
   useFocusEffect(
     useCallback(() => {
@@ -58,12 +70,13 @@ export default function AccueilScreen() {
   useEffect(() => {
     const sub = AppState.addEventListener('change', next => {
       if (appStateRef.current.match(/inactive|background/) && next === 'active') {
+        loadQr();
         pollNotifs();
       }
       appStateRef.current = next;
     });
     return () => sub.remove();
-  }, [pollNotifs]);
+  }, [loadQr, pollNotifs]);
 
   return (
     <ScrollView
@@ -82,14 +95,12 @@ export default function AccueilScreen() {
 
       {/* Header */}
       <View style={[styles.header, { paddingTop: insets.top }]}>
-        {/* Gauche : avatar profil */}
         <TouchableOpacity
           style={[styles.headerBtn, styles.avatarBtn, { top: insets.top + 12, left: 16 }]}
           onPress={() => router.push('/profil')}
           accessibilityLabel="Ouvrir le profil">
           <Text style={styles.avatarInitiales}>{initiales}</Text>
         </TouchableOpacity>
-        {/* Droite : notifications + thème */}
         <TouchableOpacity
           style={[styles.headerBtn, { top: insets.top + 12, right: 60 }]}
           onPress={() => router.push('/(tabs)/notifications')}
@@ -109,16 +120,48 @@ export default function AccueilScreen() {
         </TouchableOpacity>
       </View>
 
+      {/* QR code flottant */}
+      <View style={styles.qrAnchor}>
+        <TouchableOpacity
+          style={styles.qrWrapper}
+          onPress={() => !userLoading && setQrZoomed(true)}
+          activeOpacity={0.8}
+          accessibilityLabel="Agrandir le QR code">
+          {(userLoading || qrLoading)
+            ? <View style={styles.qrPlaceholder}><ActivityIndicator color={colors.primary} /></View>
+            : <QRCode value={qrData} size={QR_SIZE} color="#000000" backgroundColor="#ffffff" />
+          }
+        </TouchableOpacity>
+      </View>
+
+      {/* Modal zoom QR */}
+      <Modal
+        visible={qrZoomed}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setQrZoomed(false)}>
+        <Pressable style={styles.modalBackdrop} onPress={() => setQrZoomed(false)}>
+          <Pressable style={styles.modalCard} onPress={() => {}}>
+            {!qrLoading && <QRCode value={qrData} size={QR_ZOOM_SIZE} color="#000000" backgroundColor="#ffffff" />}
+            <Text style={styles.modalHint}>Appuyez en dehors pour fermer</Text>
+          </Pressable>
+        </Pressable>
+      </Modal>
+
       {/* Infos utilisateur */}
-      <View style={styles.userSection}>
+      <View style={[styles.userSection, { paddingTop: QR_BELOW_HEADER + 24 }]}>
         {userLoading
           ? <ActivityIndicator color={colors.primary} />
           : <>
               <Text style={styles.name}>{nom}</Text>
               <Text style={styles.phone}>{formatPhone(phone)}</Text>
-              <View style={styles.badgePro}>
-                <Text style={styles.badgeProText}>Back-office</Text>
-              </View>
+              {!qrLoading && (
+                <View style={styles.siteBadge}>
+                  <Text style={styles.siteBadgeText}>
+                    {site ? site.nom : 'Back-office'}
+                  </Text>
+                </View>
+              )}
             </>
         }
       </View>
@@ -153,18 +196,56 @@ function makeStyles(colors: typeof Colors) {
       alignItems: 'center', justifyContent: 'center',
       paddingHorizontal: 3,
     },
-    badgeText:   { fontSize: 9, fontWeight: '700', color: '#fff' },
-    userSection: { alignItems: 'center', paddingHorizontal: 24, paddingTop: 24, paddingBottom: 8, gap: 6 },
+    badgeText: { fontSize: 9, fontWeight: '700', color: '#fff' },
+    qrAnchor: {
+      position: 'absolute',
+      top: HEADER_HEIGHT - QR_OVERLAP,
+      left: 0, right: 0,
+      alignItems: 'center',
+    },
+    qrWrapper: {
+      backgroundColor: colors.surface,
+      padding: QR_WRAPPER_PADDING,
+      borderRadius: 16,
+      borderWidth: 1,
+      borderColor: colors.border,
+      shadowColor: colors.headerBg,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.1,
+      shadowRadius: 12,
+      elevation: 6,
+    },
+    qrPlaceholder:  { width: QR_SIZE, height: QR_SIZE, alignItems: 'center', justifyContent: 'center' },
+    modalBackdrop: {
+      flex: 1,
+      backgroundColor: 'rgba(0,0,0,0.65)',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    modalCard: {
+      backgroundColor: colors.surface,
+      padding: 28,
+      borderRadius: 20,
+      alignItems: 'center',
+      gap: 16,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 8 },
+      shadowOpacity: 0.25,
+      shadowRadius: 16,
+      elevation: 12,
+    },
+    modalHint:  { fontSize: 12, color: colors.textMuted },
+    userSection: { alignItems: 'center', paddingHorizontal: 24, gap: 6 },
     name:        { fontSize: 24, fontWeight: '700', color: colors.text, textAlign: 'center' },
     phone:       { fontSize: 15, color: colors.textMuted, textAlign: 'center' },
-    badgePro: {
+    siteBadge: {
       backgroundColor: colors.primary + '22',
       borderRadius: 20,
       paddingHorizontal: 12,
       paddingVertical: 4,
       marginTop: 4,
     },
-    badgeProText: { fontSize: 12, fontWeight: '600', color: colors.primary },
-    statsSection: { marginTop: 24 },
+    siteBadgeText: { fontSize: 12, fontWeight: '600', color: colors.primary },
+    statsSection:  { marginTop: 24 },
   });
 }
