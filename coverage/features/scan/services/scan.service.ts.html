@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">93.75% </span>
+                <span class="strong">91.07% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>45/48</span>
+                <span class='fraction'>51/56</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">83.33% </span>
+                <span class="strong">80% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>30/36</span>
+                <span class='fraction'>32/40</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>6/6</span>
+                <span class='fraction'>7/7</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>38/38</span>
+                <span class='fraction'>44/44</span>
             </div>
         
             
@@ -197,7 +197,17 @@
 <a name='L132'></a><a href='#L132'>132</a>
 <a name='L133'></a><a href='#L133'>133</a>
 <a name='L134'></a><a href='#L134'>134</a>
-<a name='L135'></a><a href='#L135'>135</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L135'></a><a href='#L135'>135</a>
+<a name='L136'></a><a href='#L136'>136</a>
+<a name='L137'></a><a href='#L137'>137</a>
+<a name='L138'></a><a href='#L138'>138</a>
+<a name='L139'></a><a href='#L139'>139</a>
+<a name='L140'></a><a href='#L140'>140</a>
+<a name='L141'></a><a href='#L141'>141</a>
+<a name='L142'></a><a href='#L142'>142</a>
+<a name='L143'></a><a href='#L143'>143</a>
+<a name='L144'></a><a href='#L144'>144</a>
+<a name='L145'></a><a href='#L145'>145</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -291,7 +301,15 @@
 <span class="cline-any cline-yes">9x</span>
 <span class="cline-any cline-yes">9x</span>
 <span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -302,12 +320,14 @@
 <span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
@@ -423,18 +443,27 @@ type QrType = 'user' | 'client' | 'livraison';
 &nbsp;
 function detectQrType(raw: string): QrType {
   const upper = raw.trim().toUpperCase();
-  if (upper.startsWith('CLI-'))              return 'client';
+  if (upper.startsWith('CLI-')) return 'client';
   if (upper.startsWith('VT-') || upper.startsWith('TR-')) return 'livraison';
+  // URL encodant une livraison : https://…/scan/livraison/VT-xxxxx
+  <span class="missing-if-branch" title="if path not taken" >I</span>if (upper.includes('/SCAN/LIVRAISON/')) <span class="cstat-no" title="statement not covered" >return 'livraison';</span>
   return 'user';
+}
+&nbsp;
+function extractLivraisonRef(raw: string): string {
+  const idx = raw.toUpperCase().indexOf('/SCAN/LIVRAISON/');
+  <span class="missing-if-branch" title="if path not taken" >I</span>if (idx !== -1) <span class="cstat-no" title="statement not covered" >return raw.slice(idx + '/scan/livraison/'.length);</span>
+  return raw;
 }
 &nbsp;
 // ─── Résolution mock ─────────────────────────────────────────────────────────
 &nbsp;
 async function scanMock(value: string, qrType: QrType): Promise&lt;ApiResult&lt;ScanResult&gt;&gt; {
   await new Promise&lt;void&gt;(r =&gt; setTimeout(r, 700));
-  if (qrType === 'user')      return { ok: true, data: { type: 'user',      data: MOCK_USER } };
-  if (qrType === 'client')    return { ok: true, data: { type: 'client',    data: MOCK_CLIENT } };
-  const mock = value.toUpperCase().startsWith('TR-') ? MOCK_TRANSFERT : MOCK_COMMANDE;
+  if (qrType === 'user')   return { ok: true, data: { type: 'user',   data: MOCK_USER } };
+  if (qrType === 'client') return { ok: true, data: { type: 'client', data: MOCK_CLIENT } };
+  const ref = extractLivraisonRef(value).toUpperCase();
+  const mock = ref.startsWith('TR-') ? MOCK_TRANSFERT : MOCK_COMMANDE;
   return { ok: true, data: { type: 'livraison', data: mock } };
 }
 &nbsp;
@@ -442,7 +471,8 @@ async function scanMock(value: string, qrType: QrType): Promise&lt;ApiResult&lt;
 &nbsp;
 async function scanApi(value: string, qrType: QrType): Promise&lt;ApiResult&lt;ScanResult&gt;&gt; {
   if (qrType === 'livraison') {
-    const res = await authGet&lt;LivraisonScan&gt;(`/api/v1/mobile/livraisons/scan/${encodeURIComponent(value)}`);
+    const ref = extractLivraisonRef(value);
+    const res = await authGet&lt;LivraisonScan&gt;(`/api/v1/mobile/livraisons/scan/${encodeURIComponent(ref)}`);
     <span class="missing-if-branch" title="if path not taken" >I</span>if (!res.ok) <span class="cstat-no" title="statement not covered" >return res;</span>
     return { ok: true, data: { type: 'livraison', data: res.data } };
   }
@@ -472,7 +502,7 @@ export const scanService = {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-06-08T16:03:05.563Z
+                at 2026-06-09T14:05:15.120Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>
