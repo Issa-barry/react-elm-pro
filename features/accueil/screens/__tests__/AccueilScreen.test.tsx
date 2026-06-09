@@ -20,10 +20,6 @@ jest.mock('expo-router', () => ({
 jest.mock('@/features/notifications/services/notifications-api.service', () => ({
   fetchNotifications: jest.fn().mockResolvedValue({ unread_count: 0 }),
 }));
-jest.mock('../../components/DashboardStats', () => {
-  const { View } = require('react-native');
-  return () => <View testID="dashboard-stats" />;
-});
 jest.mock('react-native-qrcode-svg', () => {
   const R  = require('react');
   const RN = require('react-native');
@@ -96,8 +92,4 @@ describe('AccueilScreen — infos utilisateur', () => {
     expect(screen.getByTestId('qrcode')).toBeTruthy();
   });
 
-  it('affiche le dashboard stats', () => {
-    render(<AccueilScreen />);
-    expect(screen.getByTestId('dashboard-stats')).toBeTruthy();
-  });
 });

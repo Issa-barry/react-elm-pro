@@ -8,6 +8,10 @@ function IconAccueil({ color }: Readonly<{ color: string }>) {
   return <IconSymbol size={28} name="house.fill" color={color} />;
 }
 
+function IconDashboard({ color }: Readonly<{ color: string }>) {
+  return <IconSymbol size={28} name="chart.bar.fill" color={color} />;
+}
+
 function IconNotifications({ color }: Readonly<{ color: string }>) {
   return <IconSymbol size={28} name="bell.fill" color={color} />;
 }
@@ -31,6 +35,10 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{ title: 'Accueil', tabBarIcon: IconAccueil }}
+      />
+      <Tabs.Screen
+        name="dashboard"
+        options={{ title: 'Tableau de bord', tabBarIcon: IconDashboard }}
       />
       <Tabs.Screen
         name="notifications"

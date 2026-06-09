@@ -9,9 +9,9 @@ import { useTheme } from '@/shared/contexts/ThemeContext';
 import { IconSymbol } from '@/shared/components/ui/icon-symbol';
 import { useCurrentUser } from '@/features/auth/hooks/useCurrentUser';
 import { getInitiales } from '@/shared/utils/initiales';
+import { COUNTRIES } from '@/features/auth/types/auth.types';
 import { fetchNotifications } from '@/features/notifications/services/notifications-api.service';
 import { useQrPayload } from '../hooks/useQrPayload';
-import DashboardStats from '../components/DashboardStats';
 
 const QR_SIZE            = 90;
 const QR_ZOOM_SIZE       = 240;
@@ -23,9 +23,17 @@ const QR_BELOW_HEADER    = QR_CARD_HEIGHT - QR_OVERLAP;
 
 function formatPhone(phone: string): string {
   if (!phone) return '';
-  const match = /^\+(\d{3})(\d{3})(\d{2})(\d{2})(\d{2})$/.exec(phone);
-  if (match) return `+${match[1]} ${match[2]} ${match[3]} ${match[4]} ${match[5]}`;
-  return phone;
+  const country = COUNTRIES.find(c => phone.startsWith(c.prefix));
+  if (!country) return phone;
+  const local = phone.slice(country.prefix.length);
+  if (!local) return phone;
+  // Premier groupe de 3 si nombre de chiffres impair, sinon 2
+  const firstSize = local.length % 2 === 1 ? 3 : 2;
+  const parts: string[] = [local.slice(0, firstSize)];
+  for (let i = firstSize; i < local.length; i += 2) {
+    parts.push(local.slice(i, i + 2));
+  }
+  return `${country.prefix} ${parts.join(' ')}`;
 }
 
 export default function AccueilScreen() {
@@ -70,13 +78,12 @@ export default function AccueilScreen() {
   useEffect(() => {
     const sub = AppState.addEventListener('change', next => {
       if (appStateRef.current.match(/inactive|background/) && next === 'active') {
-        loadQr();
         pollNotifs();
       }
       appStateRef.current = next;
     });
     return () => sub.remove();
-  }, [loadQr, pollNotifs]);
+  }, [pollNotifs]);
 
   return (
     <ScrollView
@@ -166,10 +173,6 @@ export default function AccueilScreen() {
         }
       </View>
 
-      {/* Dashboard stats */}
-      <View style={styles.statsSection}>
-        <DashboardStats />
-      </View>
 
     </ScrollView>
   );
@@ -246,6 +249,5 @@ function makeStyles(colors: typeof Colors) {
       marginTop: 4,
     },
     siteBadgeText: { fontSize: 12, fontWeight: '600', color: colors.primary },
-    statsSection:  { marginTop: 24 },
   });
 }

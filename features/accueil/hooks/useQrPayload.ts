@@ -15,13 +15,21 @@ export function useQrPayload() {
   });
 
   const load = useCallback(async () => {
-    setState(prev => ({ ...prev, loading: true }));
+    // 1. Affiche le cache immédiatement — pas de spinner si déjà chargé
+    const cached = await accueilService.getCached();
+    if (cached) {
+      setState({ qrPayload: cached.qr_payload, site: cached.site, loading: false });
+    }
+
+    // 2. Rafraîchit depuis l'API en fond — silencieux si le cache existait
     const result = await accueilService.getAccueilData();
-    setState({
-      qrPayload: result.ok ? result.data.qr_payload : null,
-      site:      result.ok ? result.data.site : null,
-      loading:   false,
-    });
+    if (result.ok) {
+      setState({ qrPayload: result.data.qr_payload, site: result.data.site, loading: false });
+    } else if (!cached) {
+      // Aucun cache ET l'API échoue : on arrête le spinner
+      setState(prev => ({ ...prev, loading: false }));
+    }
+    // Si l'API échoue mais qu'un cache existe, les valeurs en cache restent affichées
   }, []);
 
   return { ...state, load };
