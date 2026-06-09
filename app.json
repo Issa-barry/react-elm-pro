@@ -1,15 +1,16 @@
 {
   "expo": {
-    "name": "Eau la maman",
-    "slug": "eau-la-maman",
+    "name": "Elm Pro",
+    "slug": "elm-mobile-pro",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "mobile",
+    "scheme": "elmpro",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
+      "bundleIdentifier": "com.issamobile.elmpro",
       "infoPlist": {
         "LSApplicationQueriesSchemes": [
           "googlegmail",
@@ -20,7 +21,7 @@
       }
     },
     "android": {
-      "package": "com.eaulamaman.client",
+      "package": "com.issamobile.elmpro",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -53,13 +54,13 @@
       [
         "expo-notifications",
         {
-          "defaultChannel": "livraisons"
+          "defaultChannel": "general"
         }
       ],
       [
         "expo-camera",
         {
-          "cameraPermission": "Autoriser l'accès à la caméra pour scanner les QR codes clients."
+          "cameraPermission": "Autoriser l'accès à la caméra pour scanner les QR codes."
         }
       ]
     ],
@@ -70,7 +71,7 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "22377fc4-8804-4e63-a2da-c37723147e16"
+        "projectId": "elm-mobile-pro-replace-with-new-id"
       }
     },
     "owner": "ibarry"

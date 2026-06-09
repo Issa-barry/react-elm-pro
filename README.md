@@ -48,12 +48,20 @@ Join our community of developers creating universal apps.
 
 - [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
 - [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
-# react-elm-client
+# elm-mobile-pro — Back-office
 
+Application mobile back-office pour Eau La Maman (Expo SDK 54).
 
+## Tests et couverture
+
+```bash
 npm run test:coverage
-Ouvre ensuite mobile/coverage/index.html dans le navigateur pour la vue ligne par ligne.
+```
+Ouvre ensuite `coverage/index.html` dans le navigateur pour la vue ligne par ligne.
 
+## EAS — initialisation du projet
 
-#pour les notifs
-npx eas init"# react-elm-pro" 
+```bash
+npx eas init
+```
+Puis mettre à jour `app.json` → `extra.eas.projectId` avec l'ID retourné.

@@ -1,10 +1,10 @@
-# Configuration CI/CD
+# Configuration CI/CD — elm-mobile-pro
 
 ## Vue d'ensemble
 
 | Déclencheur | Workflow | Résultat |
 |---|---|---|
-| Push / PR toutes branches | `ci.yml` | Lint + Tests |
+| Push / PR toutes branches | `lint.yml` + `tests.yml` | Lint + Tests |
 | Push sur `dev` | `eas-preview.yml` | APK (distribution interne) |
 | Push sur `main` | `eas-production.yml` | AAB (Play Store) |
 
@@ -22,7 +22,7 @@ Sur [expo.dev](https://expo.dev) → **Account Settings** → **Access Tokens** 
 
 ### 2. Ajouter le secret dans GitHub
 
-Dans le dépôt `Issa-barry/react-elm-client` :
+Dans le dépôt `Issa-barry/react-elm-pro` :
 
 **Settings** → **Secrets and variables** → **Actions** → **New repository secret**
 
@@ -30,14 +30,22 @@ Dans le dépôt `Issa-barry/react-elm-client` :
 |---|---|
 | `EXPO_TOKEN` | le token généré à l'étape 1 |
 
-### 3. Connecter le dépôt GitHub à EAS
+### 3. Créer un projet EAS pour elm-mobile-pro
 
 ```bash
-cd elm-mobile-client
-eas init --id 22377fc4-8804-4e63-a2da-c37723147e16
+cd react-elm-pro
+eas init
 ```
 
-Le `projectId` est déjà renseigné dans `app.json`.
+Cette commande crée un nouveau projet EAS distinct de elm-mobile-client.
+Le `projectId` retourné doit être mis à jour dans `app.json` → `extra.eas.projectId`.
+
+### 4. Identifiants distincts
+
+| App | bundle ID iOS | package Android | slug Expo |
+|---|---|---|---|
+| elm-mobile-client | `com.eaulamaman.client` | `com.eaulamaman.client` | `eau-la-maman` |
+| elm-mobile-pro | `com.issamobile.elmpro` | `com.issamobile.elmpro` | `elm-mobile-pro` |
 
 ## Soumettre au Play Store (optionnel)
 
