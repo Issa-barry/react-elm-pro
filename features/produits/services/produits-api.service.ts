@@ -1,6 +1,6 @@
 import { secureStorage } from '@/features/auth/services/secure-storage.service';
 import type { ApiResult } from '@/features/auth/types/auth.types';
-import type { AjusterStockData, MouvementStock, Produit, ProduitFormData } from '../types/produit.types';
+import type { AjusterStockData, Produit, ProduitFormData, ProduitHistoriqueResponse } from '../types/produit.types';
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL ?? '';
 
@@ -59,7 +59,7 @@ export async function createProduit(data: ProduitFormData): Promise<ApiResult<Pr
       if (data.qte_stock) formData.append('qte_stock', data.qte_stock);
       if (data.seuil_alerte_stock) formData.append('seuil_alerte_stock', data.seuil_alerte_stock);
       if (data.description) formData.append('description', data.description);
-      formData.append('is_critique', data.is_critique ? '1' : '0');
+      formData.append('is_alerte', data.is_alerte ? '1' : '0');
       formData.append('image', data.image as unknown as Blob);
 
       const res = await fetch(`${API_URL}/api/v1/backoffice/produits`, {
@@ -79,7 +79,7 @@ export async function createProduit(data: ProduitFormData): Promise<ApiResult<Pr
 
     const body: Record<string, unknown> = {
       nom: data.nom,
-      is_critique: data.is_critique,
+      is_alerte: data.is_alerte,
     };
     if (data.code_fournisseur) body.code_fournisseur = data.code_fournisseur;
     if (data.type) body.type = data.type;
@@ -126,7 +126,7 @@ export async function updateProduit(id: string, data: ProduitFormData): Promise<
       if (data.qte_stock) formData.append('qte_stock', data.qte_stock);
       if (data.seuil_alerte_stock) formData.append('seuil_alerte_stock', data.seuil_alerte_stock);
       if (data.description) formData.append('description', data.description);
-      formData.append('is_critique', data.is_critique ? '1' : '0');
+      formData.append('is_alerte', data.is_alerte ? '1' : '0');
       formData.append('image', data.image as unknown as Blob);
 
       const res = await fetch(`${API_URL}/api/v1/backoffice/produits/${id}`, {
@@ -146,7 +146,7 @@ export async function updateProduit(id: string, data: ProduitFormData): Promise<
 
     const body: Record<string, unknown> = {
       nom: data.nom,
-      is_critique: data.is_critique,
+      is_alerte: data.is_alerte,
     };
     if (data.code_fournisseur) body.code_fournisseur = data.code_fournisseur;
     if (data.type) body.type = data.type;
@@ -194,7 +194,7 @@ export async function deleteProduit(id: string): Promise<ApiResult<void>> {
   }
 }
 
-export async function fetchHistoriqueStock(id: string): Promise<ApiResult<MouvementStock[]>> {
+export async function fetchHistoriqueStock(id: string): Promise<ApiResult<ProduitHistoriqueResponse>> {
   try {
     const res = await fetch(`${API_URL}/api/v1/backoffice/produits/${id}/historique`, {
       headers: await headers(),

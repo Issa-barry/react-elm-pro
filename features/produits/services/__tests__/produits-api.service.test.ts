@@ -30,7 +30,7 @@ const PRODUIT = {
   seuil_alerte_stock: 10,
   description: null,
   image_url: null,
-  is_critique: false,
+  is_alerte: false,
   in_stock: true,
   is_low_stock: false,
   archived_at: null,
@@ -50,7 +50,7 @@ const FORM: ProduitFormData = {
   qte_stock: '100',
   seuil_alerte_stock: '10',
   description: '',
-  is_critique: false,
+  is_alerte: false,
   image: null,
 };
 

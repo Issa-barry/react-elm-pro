@@ -47,7 +47,7 @@ export default function ProduitCard({ produit, onPress, onAjusterStock }: Produi
             <Text style={[styles.nom, { color: colors.text }]} numberOfLines={1}>
               {produit.nom}
             </Text>
-            {produit.is_critique && (
+            {produit.is_alerte && (
               <Ionicons name="warning" size={14} color={colors.warning} style={styles.critiqueIcon} />
             )}
           </View>

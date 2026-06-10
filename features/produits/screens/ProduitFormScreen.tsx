@@ -402,14 +402,14 @@ function FormContent({ produitId }: { produitId: string | null }) {
           />
         </View>
 
-        {/* Est critique */}
+        {/* En alerte */}
         <View style={[styles.switchRow, { borderColor: colors.border }]}>
-          <Text style={[styles.switchLabel, { color: colors.text }]}>Produit critique</Text>
+          <Text style={[styles.switchLabel, { color: colors.text }]}>Produit en alerte</Text>
           <Switch
-            value={form.is_critique}
-            onValueChange={v => setField('is_critique', v)}
+            value={form.is_alerte}
+            onValueChange={v => setField('is_alerte', v)}
             trackColor={{ false: colors.border, true: colors.primaryLight }}
-            thumbColor={form.is_critique ? colors.primary : colors.textMuted}
+            thumbColor={form.is_alerte ? colors.primary : colors.textMuted}
           />
         </View>
 

@@ -20,7 +20,7 @@ export interface Produit {
   seuil_alerte_stock: number | null;
   description: string | null;
   image_url: string | null;
-  is_critique: boolean;
+  is_alerte: boolean;
   in_stock: boolean;
   is_low_stock: boolean;
   archived_at: string | null;
@@ -40,7 +40,7 @@ export interface ProduitFormData {
   qte_stock: string;
   seuil_alerte_stock: string;
   description: string;
-  is_critique: boolean;
+  is_alerte: boolean;
   image?: { uri: string; name: string; type: string } | null;
 }
 
@@ -59,6 +59,22 @@ export interface MouvementStock {
   notes: string | null;
   createur: string | null;
   created_at: string;
+  is_initial?: boolean;
+}
+
+export interface AuditEntry {
+  id: string;
+  event_code: string;
+  event_label: string;
+  actor_name: string;
+  old_values: Record<string, unknown> | null;
+  new_values: Record<string, unknown> | null;
+  created_at: string;
+}
+
+export interface ProduitHistoriqueResponse {
+  mouvements: MouvementStock[];
+  historique: AuditEntry[];
 }
 
 export interface ProduitsListResponse {

@@ -14,7 +14,7 @@ const DEFAULT_FORM: ProduitFormData = {
   qte_stock: '',
   seuil_alerte_stock: '',
   description: '',
-  is_critique: false,
+  is_alerte: false,
   image: null,
 };
 
@@ -32,7 +32,7 @@ function produitToForm(produit: Produit): ProduitFormData {
     seuil_alerte_stock:
       produit.seuil_alerte_stock != null ? String(produit.seuil_alerte_stock) : '',
     description: produit.description ?? '',
-    is_critique: produit.is_critique,
+    is_alerte: produit.is_alerte,
     image: null,
   };
 }

@@ -26,7 +26,7 @@ const PRODUIT: Produit = {
   seuil_alerte_stock: 10,
   description: 'Bouteille eau minérale',
   image_url: null,
-  is_critique: true,
+  is_alerte: true,
   in_stock: true,
   is_low_stock: false,
   archived_at: null,
@@ -46,7 +46,7 @@ describe('useProduitForm', () => {
     expect(result.current.form.nom).toBe('');
     expect(result.current.form.type).toBe('');
     expect(result.current.form.statut).toBe('');
-    expect(result.current.form.is_critique).toBe(false);
+    expect(result.current.form.is_alerte).toBe(false);
     expect(result.current.globalError).toBe('');
     expect(result.current.errors).toEqual({});
   });
@@ -62,7 +62,7 @@ describe('useProduitForm', () => {
     expect(result.current.form.cout).toBe('2500');
     expect(result.current.form.qte_stock).toBe('100');
     expect(result.current.form.description).toBe('Bouteille eau minérale');
-    expect(result.current.form.is_critique).toBe(true);
+    expect(result.current.form.is_alerte).toBe(true);
   });
 
   it('setField met à jour le champ correspondant', () => {

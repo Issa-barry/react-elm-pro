@@ -88,7 +88,7 @@ export default function ProduitDetailScreen() {
           headerRight: () => produit?.type_has_stock ? (
             <TouchableOpacity
               onPress={() => router.push({ pathname: '/produits/[id]/historique', params: { id } })}
-              accessibilityLabel="Historique du stock"
+              accessibilityLabel="Historique"
               style={{ paddingHorizontal: 8 }}>
               <Ionicons name="time-outline" size={22} color={colors.primary} />
             </TouchableOpacity>
@@ -129,9 +129,9 @@ export default function ProduitDetailScreen() {
           <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
             <View style={styles.titleRow}>
               <Text style={[styles.nom, { color: colors.text }]}>{produit.nom}</Text>
-              {produit.is_critique && (
+              {produit.is_alerte && (
                 <View style={[styles.badge, { backgroundColor: colors.warningBg }]}>
-                  <Text style={[styles.badgeText, { color: colors.warning }]}>Critique</Text>
+                  <Text style={[styles.badgeText, { color: colors.warning }]}>Alerte</Text>
                 </View>
               )}
             </View>
