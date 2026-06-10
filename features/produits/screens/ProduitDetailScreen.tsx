@@ -1,10 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
-import { router, useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
   Image,
+  Modal,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -46,6 +48,9 @@ export default function ProduitDetailScreen() {
   const { produit, loading, error, reload } = useProduitDetail(id ?? '');
   const [showAjuster, setShowAjuster] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [imageZoomed, setImageZoomed] = useState(false);
+
+  useFocusEffect(useCallback(() => { reload(); }, [reload]));
 
   function handleModifier() {
     router.push({ pathname: '/produits/[id]/modifier', params: { id } });
@@ -92,7 +97,17 @@ export default function ProduitDetailScreen() {
       ) : (
         <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}>
           {produit.image_url ? (
-            <Image source={{ uri: produit.image_url }} style={styles.image} resizeMode="cover" />
+            <TouchableOpacity
+              activeOpacity={0.9}
+              onPress={() => setImageZoomed(true)}
+              accessibilityLabel="Agrandir la photo">
+              <View style={[styles.imageWrapper, { backgroundColor: colors.surfaceAlt }]}>
+                <Image source={{ uri: produit.image_url }} style={styles.image} resizeMode="contain" />
+                <View style={styles.zoomHint}>
+                  <Ionicons name="expand-outline" size={18} color="#fff" />
+                </View>
+              </View>
+            </TouchableOpacity>
           ) : (
             <View style={[styles.imagePlaceholder, { backgroundColor: colors.surfaceAlt }]}>
               <Ionicons name="cube-outline" size={48} color={colors.textMuted} />
@@ -153,14 +168,6 @@ export default function ProduitDetailScreen() {
           )}
 
           <View style={styles.actions}>
-            <TouchableOpacity
-              style={[styles.actionBtn, { backgroundColor: colors.primary }]}
-              onPress={handleModifier}
-            >
-              <Ionicons name="create-outline" size={18} color="#fff" />
-              <Text style={styles.actionBtnText}>Modifier</Text>
-            </TouchableOpacity>
-
             {produit.type_has_stock && (
               <TouchableOpacity
                 style={[styles.actionBtn, { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.primary }]}
@@ -170,6 +177,14 @@ export default function ProduitDetailScreen() {
                 <Text style={[styles.actionBtnText, { color: colors.primary }]}>Ajuster le stock</Text>
               </TouchableOpacity>
             )}
+
+            <TouchableOpacity
+              style={[styles.actionBtn, { backgroundColor: colors.primary }]}
+              onPress={handleModifier}
+            >
+              <Ionicons name="create-outline" size={18} color="#fff" />
+              <Text style={styles.actionBtnText}>Modifier</Text>
+            </TouchableOpacity>
 
             <TouchableOpacity
               style={[styles.actionBtn, { backgroundColor: colors.dangerBg }]}
@@ -197,6 +212,28 @@ export default function ProduitDetailScreen() {
           onSuccess={reload}
         />
       ) : null}
+
+      <Modal
+        visible={imageZoomed}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setImageZoomed(false)}>
+        <Pressable style={styles.modalBackdrop} onPress={() => setImageZoomed(false)}>
+          <Pressable style={styles.modalImageWrapper} onPress={() => {}}>
+            <Image
+              source={{ uri: produit?.image_url ?? '' }}
+              style={styles.modalImage}
+              resizeMode="contain"
+            />
+            <TouchableOpacity
+              style={styles.modalCloseBtn}
+              onPress={() => setImageZoomed(false)}
+              accessibilityLabel="Fermer">
+              <Ionicons name="close-circle" size={32} color="#fff" />
+            </TouchableOpacity>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </View>
   );
 }
@@ -205,8 +242,23 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   center:           { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24 },
   retryBtn:         { marginTop: 12, paddingHorizontal: 20, paddingVertical: 8, borderRadius: 8, borderWidth: 1 },
-  image:            { width: '100%', height: 200 },
-  imagePlaceholder: { width: '100%', height: 150, alignItems: 'center', justifyContent: 'center' },
+  imageWrapper:     { width: '100%', height: 260, alignItems: 'center', justifyContent: 'center' },
+  image:            { width: '100%', height: 260 },
+  imagePlaceholder: { width: '100%', height: 160, alignItems: 'center', justifyContent: 'center' },
+  zoomHint: {
+    position: 'absolute', bottom: 10, right: 10,
+    backgroundColor: 'rgba(0,0,0,0.45)', borderRadius: 8,
+    padding: 5,
+  },
+  modalBackdrop: {
+    flex: 1, backgroundColor: 'rgba(0,0,0,0.92)',
+    alignItems: 'center', justifyContent: 'center',
+  },
+  modalImageWrapper: { width: '100%', height: '70%' },
+  modalImage:        { width: '100%', height: '100%' },
+  modalCloseBtn: {
+    position: 'absolute', top: -16, right: 8,
+  },
   card:             {
     margin: 16,
     marginBottom: 0,

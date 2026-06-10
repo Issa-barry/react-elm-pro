@@ -144,8 +144,8 @@ function ImagePickerSection({
     <View style={fieldStyles.container}>
       <Text style={[fieldStyles.label, { color: colors.text }]}>Photo</Text>
       {displayUri ? (
-        <View>
-          <Image source={{ uri: displayUri }} style={imgStyles.preview} contentFit="cover" />
+        <View style={[imgStyles.previewWrapper, { backgroundColor: colors.surfaceAlt }]}>
+          <Image source={{ uri: displayUri }} style={imgStyles.preview} contentFit="contain" />
           {localImage && (
             <TouchableOpacity style={imgStyles.clearBtn} onPress={onClear}>
               <Ionicons name="close-circle" size={26} color="#fff" />
@@ -179,7 +179,8 @@ function ImagePickerSection({
 }
 
 const imgStyles = StyleSheet.create({
-  preview:     { width: '100%', height: 200, borderRadius: 10 },
+  previewWrapper: { width: '100%', height: 260, borderRadius: 10, overflow: 'hidden', alignItems: 'center', justifyContent: 'center' },
+  preview:        { width: '100%', height: 260 },
   placeholder: { height: 160, borderRadius: 10, borderWidth: 1, borderStyle: 'dashed', alignItems: 'center', justifyContent: 'center' },
   clearBtn:    { position: 'absolute', top: 8, right: 8, backgroundColor: 'rgba(0,0,0,0.55)', borderRadius: 14, padding: 1 },
   btnRow:      { flexDirection: 'row', gap: 10, marginTop: 10 },
