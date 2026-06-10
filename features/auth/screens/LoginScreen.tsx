@@ -56,6 +56,7 @@ export default function LoginScreen() {
             <View style={[
               styles.errorBox,
               state.errorCode === 'account_blocked' && styles.errorBoxBlocked,
+              state.errorCode === 'not_staff'        && styles.errorBoxBlocked,
               state.errorCode === 'email_not_verified' && styles.errorBoxWarning,
             ]}>
               <Text style={[

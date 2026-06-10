@@ -95,17 +95,17 @@ export const authService = {
               prenom: 'Moussa',
               nom: 'SIDIBÉ',
               telephone: input.telephone,
-              roles: ['client'],
+              roles: ['admin_entreprise'],
             },
           },
         };
       }
       return { ok: false, error: 'Identifiants incorrects.' };
     }
-    return post<LoginResponse>('/api/auth/login', {
+    return post<LoginResponse>('/api/v1/backoffice/auth/login', {
       telephone:   input.telephone,
       password:    input.password,
-      device_name: 'EauLaMaman-Mobile',
+      device_name: 'EauLaMaman-Pro',
     });
   },
 
