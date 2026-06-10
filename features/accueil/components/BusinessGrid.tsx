@@ -14,13 +14,10 @@ interface GridItem {
 }
 
 const ITEMS: GridItem[] = [
-  { id: 'ventes',       label: 'Ventes',        icon: 'cart.fill',             route: '/ventes' },
-  { id: 'clients',      label: 'Clients',        icon: 'person.2.fill',         route: '/clients' },
-  { id: 'vehicules',    label: 'Véhicules',      icon: 'car.fill',              route: '/vehicules' },
-  { id: 'produits',     label: 'Produits',       icon: 'cube.fill',             route: '/produits' },
-  { id: 'logistique',   label: 'Logistique',     icon: 'shippingbox.fill',      route: '/logistique' },
-  { id: 'sites',        label: 'Sites',          icon: 'mappin.and.ellipse',    route: '/sites' },
-  { id: 'utilisateurs', label: 'Utilisateurs',   icon: 'person.3.fill',         route: '/utilisateurs' },
+  { id: 'ventes',     label: 'Ventes',     icon: 'cart.fill',        route: '/ventes' },
+  { id: 'vehicules',  label: 'Véhicules',  icon: 'car.fill',         route: '/vehicules' },
+  { id: 'produits',   label: 'Produits',   icon: 'cube.fill',        route: '/produits' },
+  { id: 'logistique', label: 'Logistique', icon: 'shippingbox.fill', route: '/logistique' },
 ];
 
 export default function BusinessGrid() {

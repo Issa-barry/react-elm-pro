@@ -68,6 +68,7 @@ function ThemedApp() {
     headerStyle:      { backgroundColor: colors.surface },
     headerTitleStyle: { color: colors.text },
     headerTintColor:  colors.primary,
+    headerBackTitle:  'Retour',
   };
 
   return (
@@ -84,6 +85,13 @@ function ThemedApp() {
         <Stack.Screen name="profil/contact"       options={{ headerShown: false }} />
         <Stack.Screen name="profil/conditions"    options={{ headerShown: false }} />
         <Stack.Screen name="profil/biometrie"     options={{ headerShown: false }} />
+        <Stack.Screen name="ventes"              options={{ headerShown: false }} />
+        <Stack.Screen name="vehicules"           options={{ headerShown: false }} />
+        <Stack.Screen name="produits"            options={{ headerShown: false }} />
+        <Stack.Screen name="produits/[id]"          options={{ title: 'Détail produit' }} />
+        <Stack.Screen name="produits/create"        options={{ title: 'Nouveau produit' }} />
+        <Stack.Screen name="produits/[id]/modifier" options={{ title: 'Modifier le produit' }} />
+        <Stack.Screen name="logistique"          options={{ headerShown: false }} />
       </Stack>
       <StatusBar style={isDark ? 'light' : 'dark'} />
     </ThemeProvider>

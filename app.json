@@ -32,7 +32,8 @@
       "predictiveBackGestureEnabled": false,
       "permissions": [
         "android.permission.CAMERA",
-        "android.permission.RECORD_AUDIO"
+        "android.permission.RECORD_AUDIO",
+        "android.permission.READ_MEDIA_IMAGES"
       ]
     },
     "web": {
@@ -61,6 +62,13 @@
         "expo-camera",
         {
           "cameraPermission": "Autoriser l'accès à la caméra pour scanner les QR codes."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Autoriser l'accès à la galerie pour ajouter une photo au produit.",
+          "cameraPermission": "Autoriser l'accès à la caméra pour prendre une photo du produit."
         }
       ]
     ],
