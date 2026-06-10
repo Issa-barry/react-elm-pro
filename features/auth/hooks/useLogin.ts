@@ -1,11 +1,11 @@
 import { useCallback, useState } from 'react';
-import { router } from 'expo-router';
 
+import { registerPushNotifications } from '@/features/notifications/services/notification.service';
 import { DEFAULT_COUNTRY, buildE164, type LoginInput } from '../types/auth.types';
 import { validateLogin } from '../validation/auth.validation';
 import { authService } from '../services/auth.service';
 import { secureStorage } from '../services/secure-storage.service';
-import { registerPushNotifications } from '@/features/notifications/services/notification.service';
+import { useAuth } from '../contexts/AuthContext';
 
 interface LoginState {
   codePays: string;
@@ -31,6 +31,7 @@ const INITIAL: LoginState = {
 
 export function useLogin() {
   const [state, setState] = useState<LoginState>(INITIAL);
+  const { signIn } = useAuth();
 
   const set = useCallback(<K extends keyof LoginState>(key: K, value: LoginState[K]) => {
     setState(prev => ({ ...prev, [key]: value, errors: { ...prev.errors, [key]: '' }, globalError: '', errorCode: '' }));
@@ -62,9 +63,9 @@ export function useLogin() {
 
     await secureStorage.saveToken(result.data.token);
     await secureStorage.saveUser(result.data.user);
-    router.replace('/(tabs)');
+    signIn();
     registerPushNotifications().catch(console.warn);
-  }, [state]);
+  }, [state, signIn]);
 
   return { state, set, setCountry, submit };
 }

@@ -5,7 +5,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '@/shared/contexts/ThemeContext';
 import { AppLogo } from '@/shared/components/AppLogo';
-import { CloseButton } from '@/shared/components/CloseButton';
 import { useLogin } from '../hooks/useLogin';
 import { PhoneInput } from '../components/PhoneInput';
 import { PasswordInput } from '../components/PasswordInput';
@@ -21,7 +20,6 @@ export default function LoginScreen() {
     <KeyboardAvoidingView
       style={styles.flex}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <CloseButton />
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={[styles.content, { paddingTop: insets.top + 32, paddingBottom: insets.bottom + 32 }]}

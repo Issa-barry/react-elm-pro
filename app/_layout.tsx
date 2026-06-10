@@ -1,12 +1,13 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import * as Notifications from 'expo-notifications';
-import { Stack } from 'expo-router';
+import { router, Stack, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useRef } from 'react';
 import 'react-native-reanimated';
 
-import { AppThemeProvider, useTheme } from '@/shared/contexts/ThemeContext';
+import { AuthProvider, useAuth } from '@/features/auth/contexts/AuthContext';
 import { registerPushNotifications } from '@/features/notifications/services/notification.service';
+import { AppThemeProvider, useTheme } from '@/shared/contexts/ThemeContext';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -43,13 +44,27 @@ export default function RootLayout() {
 
   return (
     <AppThemeProvider>
-      <ThemedApp />
+      <AuthProvider>
+        <ThemedApp />
+      </AuthProvider>
     </AppThemeProvider>
   );
 }
 
 function ThemedApp() {
   const { isDark, colors } = useTheme();
+  const { isAuthenticated, ready } = useAuth();
+  const segments = useSegments();
+
+  useEffect(() => {
+    if (!ready) return;
+    const inAuth = segments[0] === '(auth)';
+    if (!isAuthenticated && !inAuth) {
+      router.replace('/(auth)/login');
+    } else if (isAuthenticated && inAuth) {
+      router.replace('/(tabs)');
+    }
+  }, [isAuthenticated, ready, segments]);
 
   const base = isDark ? DarkTheme : DefaultTheme;
   const navTheme = {

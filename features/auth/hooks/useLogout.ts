@@ -1,11 +1,12 @@
 import { useCallback, useState } from 'react';
 import { Alert } from 'react-native';
-import { router } from 'expo-router';
 
 import { secureStorage } from '../services/secure-storage.service';
+import { useAuth } from '../contexts/AuthContext';
 
 export function useLogout() {
   const [loading, setLoading] = useState(false);
+  const { signOut } = useAuth();
 
   const logout = useCallback(() => {
     Alert.alert(
@@ -20,12 +21,12 @@ export function useLogout() {
             setLoading(true);
             await secureStorage.clear();
             setLoading(false);
-            router.replace('/(auth)/login');
+            signOut();
           },
         },
       ],
     );
-  }, []);
+  }, [signOut]);
 
   return { logout, loading };
 }
