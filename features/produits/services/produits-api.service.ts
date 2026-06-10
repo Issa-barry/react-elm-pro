@@ -1,6 +1,6 @@
 import { secureStorage } from '@/features/auth/services/secure-storage.service';
 import type { ApiResult } from '@/features/auth/types/auth.types';
-import type { AjusterStockData, Produit, ProduitFormData } from '../types/produit.types';
+import type { AjusterStockData, MouvementStock, Produit, ProduitFormData } from '../types/produit.types';
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL ?? '';
 
@@ -189,6 +189,19 @@ export async function deleteProduit(id: string): Promise<ApiResult<void>> {
       return { ok: false, error: json.message ?? 'Erreur suppression produit' };
     }
     return { ok: true, data: undefined };
+  } catch {
+    return { ok: false, error: 'Erreur réseau' };
+  }
+}
+
+export async function fetchHistoriqueStock(id: string): Promise<ApiResult<MouvementStock[]>> {
+  try {
+    const res = await fetch(`${API_URL}/api/v1/backoffice/produits/${id}/historique`, {
+      headers: await headers(),
+    });
+    const json = await res.json();
+    if (!res.ok) return { ok: false, error: json.message ?? 'Erreur chargement historique' };
+    return { ok: true, data: json };
   } catch {
     return { ok: false, error: 'Erreur réseau' };
   }

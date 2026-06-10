@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { router, Stack, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
@@ -83,6 +83,18 @@ export default function ProduitDetailScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <Stack.Screen
+        options={{
+          headerRight: () => produit?.type_has_stock ? (
+            <TouchableOpacity
+              onPress={() => router.push({ pathname: '/produits/[id]/historique', params: { id } })}
+              accessibilityLabel="Historique du stock"
+              style={{ paddingHorizontal: 8 }}>
+              <Ionicons name="time-outline" size={22} color={colors.primary} />
+            </TouchableOpacity>
+          ) : null,
+        }}
+      />
       {loading ? (
         <View style={styles.center}>
           <ActivityIndicator color={colors.primary} />
@@ -132,6 +144,8 @@ export default function ProduitDetailScreen() {
           <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
             <Text style={[styles.sectionTitle, { color: colors.text }]}>Informations</Text>
             <View style={[styles.divider, { backgroundColor: colors.border }]} />
+            <InfoRow label="Code interne" value={produit.code_interne ?? '—'} />
+            <View style={[styles.divider, { backgroundColor: colors.borderLight }]} />
             <InfoRow label="Code fournisseur" value={produit.code_fournisseur ?? '—'} />
             <View style={[styles.divider, { backgroundColor: colors.borderLight }]} />
             <InfoRow label="Type" value={produit.type_label ?? produit.type ?? '—'} />

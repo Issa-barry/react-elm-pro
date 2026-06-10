@@ -50,6 +50,17 @@ export interface AjusterStockData {
   motif?: string;
 }
 
+export interface MouvementStock {
+  id: string;
+  type: 'entree' | 'sortie';
+  quantite: number;
+  stock_avant: number;
+  stock_apres: number;
+  notes: string | null;
+  createur: string | null;
+  created_at: string;
+}
+
 export interface ProduitsListResponse {
   data: Produit[];
 }
