@@ -1,5 +1,5 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import * as Notifications from 'expo-notifications';
+import Constants from 'expo-constants';
 import { router, Stack, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useRef } from 'react';
@@ -9,34 +9,47 @@ import { AuthProvider, useAuth } from '@/features/auth/contexts/AuthContext';
 import { registerPushNotifications } from '@/features/notifications/services/notification.service';
 import { AppThemeProvider, useTheme } from '@/shared/contexts/ThemeContext';
 
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: false,
-    shouldShowBanner: true,
-    shouldShowList: true,
-  }),
-});
 
 export const unstable_settings = {
   anchor: '(auth)',
 };
 
 export default function RootLayout() {
-  const notificationListener = useRef<Notifications.EventSubscription | null>(null);
-  const responseListener     = useRef<Notifications.EventSubscription | null>(null);
+  const notificationListener = useRef<{ remove: () => void } | null>(null);
+  const responseListener     = useRef<{ remove: () => void } | null>(null);
 
   useEffect(() => {
-    registerPushNotifications().catch(console.warn);
+    // expo-notifications push non supporté dans Expo Go depuis SDK 53 — import dynamique
+    if (Constants.executionEnvironment === 'storeClient') return;
 
-    notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
-      console.log('[Push] Notification reçue:', notification.request.content.title);
-    });
-    responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
-      console.log('[Push] Notification touchée:', response.notification.request.content.data);
-    });
+    let cancelled = false;
+
+    (async () => {
+      const Notifications = await import('expo-notifications');
+      if (cancelled) return;
+
+      Notifications.setNotificationHandler({
+        handleNotification: async () => ({
+          shouldShowAlert: true,
+          shouldPlaySound: true,
+          shouldSetBadge: false,
+          shouldShowBanner: true,
+          shouldShowList: true,
+        }),
+      });
+
+      registerPushNotifications().catch(console.warn);
+
+      notificationListener.current = Notifications.addNotificationReceivedListener(n => {
+        console.log('[Push] Notification reçue:', n.request.content.title);
+      });
+      responseListener.current = Notifications.addNotificationResponseReceivedListener(r => {
+        console.log('[Push] Notification touchée:', r.notification.request.content.data);
+      });
+    })();
+
     return () => {
+      cancelled = true;
       notificationListener.current?.remove();
       responseListener.current?.remove();
     };
@@ -109,7 +122,7 @@ function ThemedApp() {
         <Stack.Screen name="produits/[id]/historique" options={{ headerShown: false }} />
         <Stack.Screen name="logistique"          options={{ headerShown: false }} />
       </Stack>
-      <StatusBar style={isDark ? 'light' : 'dark'} />
+      <StatusBar style={isDark ? 'light' : 'dark'} backgroundColor={colors.surface} />
     </ThemeProvider>
   );
 }

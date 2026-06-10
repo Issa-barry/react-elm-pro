@@ -1,4 +1,5 @@
 import { ActivityIndicator, AppState, Modal, Pressable, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import QRCode from 'react-native-qrcode-svg';
@@ -90,6 +91,8 @@ export default function AccueilScreen() {
   }, [pollNotifs]);
 
   return (
+    <>
+    <StatusBar style="light" backgroundColor={colors.headerBg} />
     <ScrollView
       ref={scrollRef}
       style={styles.scroll}
@@ -188,6 +191,7 @@ export default function AccueilScreen() {
       </View>
 
     </ScrollView>
+    </>
   );
 }
 

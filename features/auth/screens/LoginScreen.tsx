@@ -30,7 +30,7 @@ export default function LoginScreen() {
         <View style={styles.header}>
           <AppLogo size={80} />
           <Text style={styles.title}>Connexion</Text>
-          <Text style={styles.subtitle}>Eau la maman</Text>
+          <Text style={styles.subtitle}>Eau la maman PRO</Text>
         </View>
 
         {/* Formulaire */}

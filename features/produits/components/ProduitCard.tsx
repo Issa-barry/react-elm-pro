@@ -148,29 +148,31 @@ export default function ProduitCard({ produit, onPress, onAjusterStock }: Produi
   );
 }
 
+const IMG = 90;
+
 const styles = StyleSheet.create({
   card: {
     flexDirection: 'row',
     alignItems: 'center',
     marginHorizontal: 16,
-    marginVertical: 7,
-    borderRadius: 14,
+    marginVertical: 8,
+    borderRadius: 16,
     borderWidth: StyleSheet.hairlineWidth,
-    padding: 14,
-    gap: 14,
-    minHeight: 100,
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+    gap: 12,
   },
 
   imageBox: {
-    width: 72,
-    height: 72,
+    width: IMG,
+    height: IMG,
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
     flexShrink: 0,
   },
-  image: { width: 72, height: 72 },
+  image: { width: IMG, height: IMG },
   zoomHint: {
     position: 'absolute',
     bottom: 4,
@@ -182,7 +184,8 @@ const styles = StyleSheet.create({
 
   info: {
     flex: 1,
-    gap: 6,
+    gap: 8,
+    justifyContent: 'center',
   },
   titleRow: {
     flexDirection: 'row',
@@ -192,9 +195,9 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '700',
     flex: 1,
-    lineHeight: 20,
+    lineHeight: 21,
   },
-  alertIcon: { marginLeft: 4, marginTop: 2 },
+  alertIcon: { marginLeft: 4, marginTop: 3 },
 
   metaRow: {
     flexDirection: 'row',
@@ -203,11 +206,11 @@ const styles = StyleSheet.create({
   },
   badge: {
     borderRadius: 6,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
+    paddingHorizontal: 7,
+    paddingVertical: 2,
   },
   badgeText: {
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '600',
   },
 
@@ -222,15 +225,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 4,
   },
-  stock: { fontSize: 12 },
+  stock: { fontSize: 11 },
 
   ajusterBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
     flexShrink: 0,
+    marginRight: 2,
   },
 
   // Zoom modal
@@ -240,11 +244,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  modalImageWrapper: {
-    width: '90%',
-    height: '60%',
-  },
-  modalImage: { width: '100%', height: '100%' },
+  modalImageWrapper: { width: '90%', height: '60%' },
+  modalImage:        { width: '100%', height: '100%' },
   modalCloseBtn: {
     position: 'absolute',
     top: -18,

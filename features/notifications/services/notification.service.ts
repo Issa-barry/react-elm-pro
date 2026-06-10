@@ -1,24 +1,20 @@
-import * as Device from 'expo-device';
-import * as Notifications from 'expo-notifications';
 import Constants from 'expo-constants';
+import * as Device from 'expo-device';
 import { Platform } from 'react-native';
 
 import { secureStorage } from '@/features/auth/services/secure-storage.service';
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL ?? '';
 
-function resolveProjectId(): string | undefined {
-  return (
-    Constants?.expoConfig?.extra?.eas?.projectId ??
-    (Constants?.easConfig as { projectId?: string } | undefined)?.projectId ??
-    // Dans Expo Go, l'ID peut être exposé dans le manifest
-    (Constants?.manifest2 as Record<string, unknown> | undefined)
-      ?.extra as string | undefined
-  );
-}
+// expo-notifications a retiré le support push d'Expo Go depuis SDK 53.
+// On importe le module dynamiquement pour que DevicePushTokenAutoRegistration.fx.js
+// ne se charge jamais dans Expo Go (l'import statique le déclenche au module-load).
+const isExpoGo = Constants.executionEnvironment === 'storeClient';
 
 export async function registerPushNotifications(): Promise<void> {
-  if (!Device.isDevice) return;
+  if (isExpoGo || !Device.isDevice) return;
+
+  const Notifications = await import('expo-notifications');
 
   if (Platform.OS === 'android') {
     await Notifications.setNotificationChannelAsync('general', {
@@ -39,10 +35,11 @@ export async function registerPushNotifications(): Promise<void> {
 
   if (finalStatus !== 'granted') return;
 
-  const projectId = resolveProjectId();
+  const projectId =
+    Constants?.expoConfig?.extra?.eas?.projectId ??
+    (Constants?.easConfig as { projectId?: string } | undefined)?.projectId;
 
   if (!projectId) {
-    // Pas bloquant — les push seront activés dès que eas init est fait
     console.warn('[Push] projectId introuvable. Lancez: npx eas init');
     return;
   }
@@ -52,7 +49,6 @@ export async function registerPushNotifications(): Promise<void> {
     const result = await Notifications.getExpoPushTokenAsync({ projectId });
     token = result.data;
   } catch (err) {
-    // warn et non error pour ne pas déclencher l'overlay rouge Expo Go
     console.warn('[Push] getExpoPushTokenAsync échoué:', err);
     return;
   }

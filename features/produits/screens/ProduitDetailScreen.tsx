@@ -95,7 +95,7 @@ export default function ProduitDetailScreen() {
           <Text style={[styles.backLabel, { color: colors.primary }]}>Retour</Text>
         </TouchableOpacity>
         <Text style={[styles.headerTitle, { color: colors.text }]} numberOfLines={1}>
-          {produit ? produit.nom : 'Détail produit'}
+          Détail du produit
         </Text>
         <View style={styles.headerRight}>
           {produit?.type_has_stock ? (

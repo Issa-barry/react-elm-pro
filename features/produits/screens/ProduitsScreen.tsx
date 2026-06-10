@@ -23,7 +23,7 @@ import { useProduits } from '../hooks/useProduits';
 import type { Produit } from '../types/produit.types';
 
 type StatutFilter = 'tous' | 'actif' | 'inactif' | 'archive';
-type TypeFilter   = 'tous' | 'materiel' | 'service' | 'fabricable' | 'achat_vente';
+type TypeFilter   = 'materiel' | 'service' | 'fabricable' | 'achat_vente';
 
 const STATUT_OPTIONS: { key: StatutFilter; label: string }[] = [
   { key: 'tous',    label: 'Tous' },
@@ -33,7 +33,6 @@ const STATUT_OPTIONS: { key: StatutFilter; label: string }[] = [
 ];
 
 const TYPE_OPTIONS: { key: TypeFilter; label: string }[] = [
-  { key: 'tous',        label: 'Tous' },
   { key: 'materiel',    label: 'Matériel' },
   { key: 'service',     label: 'Service' },
   { key: 'fabricable',  label: 'Fabricable' },
@@ -45,34 +44,38 @@ const TYPE_OPTIONS: { key: TypeFilter; label: string }[] = [
 interface FilterModalProps {
   visible: boolean;
   statut: StatutFilter;
-  type: TypeFilter;
+  types: TypeFilter[];
   alerte: boolean;
-  onApply: (s: StatutFilter, t: TypeFilter, a: boolean) => void;
+  onApply: (s: StatutFilter, t: TypeFilter[], a: boolean) => void;
   onClose: () => void;
 }
 
-function FilterModal({ visible, statut, type, alerte, onApply, onClose }: FilterModalProps) {
+function FilterModal({ visible, statut, types, alerte, onApply, onClose }: FilterModalProps) {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
 
   const [tmpStatut, setTmpStatut] = useState<StatutFilter>(statut);
-  const [tmpType, setTmpType]     = useState<TypeFilter>(type);
+  const [tmpTypes, setTmpTypes]   = useState<TypeFilter[]>(types);
   const [tmpAlerte, setTmpAlerte] = useState(alerte);
 
   function handleOpen() {
     setTmpStatut(statut);
-    setTmpType(type);
+    setTmpTypes(types);
     setTmpAlerte(alerte);
   }
 
   function handleReset() {
     setTmpStatut('tous');
-    setTmpType('tous');
+    setTmpTypes([]);
     setTmpAlerte(false);
   }
 
+  function toggleType(key: TypeFilter) {
+    setTmpTypes(prev => prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]);
+  }
+
   function handleApply() {
-    onApply(tmpStatut, tmpType, tmpAlerte);
+    onApply(tmpStatut, tmpTypes, tmpAlerte);
   }
 
   return (
@@ -83,8 +86,9 @@ function FilterModal({ visible, statut, type, alerte, onApply, onClose }: Filter
       onRequestClose={onClose}
       onShow={handleOpen}
     >
-      <Pressable style={styles.modalBackdrop} onPress={onClose} />
-      <View style={[styles.sheet, { backgroundColor: colors.surface, paddingBottom: insets.bottom + 16 }]}>
+      <View style={styles.modalContainer}>
+        <Pressable style={StyleSheet.absoluteFillObject} onPress={onClose} />
+        <View style={[styles.sheet, { backgroundColor: colors.surface, paddingBottom: insets.bottom + 16 }]}>
         {/* Drag bar */}
         <View style={[styles.dragBar, { backgroundColor: colors.border }]} />
 
@@ -122,11 +126,11 @@ function FilterModal({ visible, statut, type, alerte, onApply, onClose }: Filter
             })}
           </View>
 
-          {/* Type */}
+          {/* Type — multi-sélect */}
           <Text style={[styles.filterLabel, { color: colors.textMuted, marginTop: 20 }]}>TYPE</Text>
           <View style={styles.optionGroup}>
             {TYPE_OPTIONS.map(opt => {
-              const active = tmpType === opt.key;
+              const active = tmpTypes.includes(opt.key);
               return (
                 <TouchableOpacity
                   key={opt.key}
@@ -136,9 +140,10 @@ function FilterModal({ visible, statut, type, alerte, onApply, onClose }: Filter
                       ? { backgroundColor: colors.primary, borderColor: colors.primary }
                       : { backgroundColor: colors.surfaceAlt, borderColor: colors.border },
                   ]}
-                  onPress={() => setTmpType(opt.key)}
+                  onPress={() => toggleType(opt.key)}
                   activeOpacity={0.7}
                 >
+                  {active && <Ionicons name="checkmark" size={13} color="#fff" style={{ marginRight: 4 }} />}
                   <Text style={[styles.optionLabel, { color: active ? '#fff' : colors.text }]}>
                     {opt.label}
                   </Text>
@@ -188,6 +193,7 @@ function FilterModal({ visible, statut, type, alerte, onApply, onClose }: Filter
           </TouchableOpacity>
         </View>
       </View>
+      </View>
     </Modal>
   );
 }
@@ -203,17 +209,17 @@ export default function ProduitsScreen() {
   const [showFilter, setShowFilter]     = useState(false);
   const [search, setSearch]             = useState('');
   const [statutFilter, setStatutFilter] = useState<StatutFilter>('tous');
-  const [typeFilter, setTypeFilter]     = useState<TypeFilter>('tous');
+  const [typeFilter, setTypeFilter]     = useState<TypeFilter[]>([]);
   const [alerteOnly, setAlerteOnly]     = useState(false);
 
-  const activeFilterCount = (statutFilter !== 'tous' ? 1 : 0) + (typeFilter !== 'tous' ? 1 : 0) + (alerteOnly ? 1 : 0);
+  const activeFilterCount = (statutFilter !== 'tous' ? 1 : 0) + (typeFilter.length > 0 ? 1 : 0) + (alerteOnly ? 1 : 0);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     return produits.filter(p => {
       if (q && !p.nom.toLowerCase().includes(q) && !(p.code_interne ?? '').toLowerCase().includes(q)) return false;
       if (statutFilter !== 'tous' && p.statut !== statutFilter) return false;
-      if (typeFilter !== 'tous' && p.type !== typeFilter) return false;
+      if (typeFilter.length > 0 && !typeFilter.includes(p.type as TypeFilter)) return false;
       if (alerteOnly && !p.is_alerte) return false;
       return true;
     });
@@ -288,12 +294,12 @@ export default function ProduitsScreen() {
           <Text style={[styles.filterSummaryText, { color: colors.primary }]} numberOfLines={1}>
             {filtered.length} résultat{filtered.length !== 1 ? 's' : ''}
             {statutFilter !== 'tous' ? ` · ${STATUT_OPTIONS.find(o => o.key === statutFilter)?.label}` : ''}
-            {typeFilter !== 'tous' ? ` · ${TYPE_OPTIONS.find(o => o.key === typeFilter)?.label}` : ''}
+            {typeFilter.length > 0 ? ` · ${typeFilter.map(t => TYPE_OPTIONS.find(o => o.key === t)?.label).join(', ')}` : ''}
             {alerteOnly ? ' · Alerte' : ''}
             {search.trim() ? ` · "${search.trim()}"` : ''}
           </Text>
           <TouchableOpacity
-            onPress={() => { setSearch(''); setStatutFilter('tous'); setTypeFilter('tous'); setAlerteOnly(false); }}
+            onPress={() => { setSearch(''); setStatutFilter('tous'); setTypeFilter([]); setAlerteOnly(false); }}
             hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
           >
             <Ionicons name="close-circle" size={16} color={colors.primary} />
@@ -353,7 +359,7 @@ export default function ProduitsScreen() {
       <FilterModal
         visible={showFilter}
         statut={statutFilter}
-        type={typeFilter}
+        types={typeFilter}
         alerte={alerteOnly}
         onApply={(s, t, a) => { setStatutFilter(s); setTypeFilter(t); setAlerteOnly(a); setShowFilter(false); }}
         onClose={() => setShowFilter(false)}
@@ -438,8 +444,13 @@ const styles = StyleSheet.create({
   retryBtn:       { paddingHorizontal: 20, paddingVertical: 8, borderRadius: 8, borderWidth: 1 },
 
   // Filter modal / bottom sheet
-  modalBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.35)' },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0,0,0,0.35)',
+  },
   sheet: {
+    flex: 1,
     maxHeight: '75%',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
@@ -453,6 +464,8 @@ const styles = StyleSheet.create({
   filterLabel: { fontSize: 11, fontWeight: '700', letterSpacing: 0.6, marginBottom: 10 },
   optionGroup: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   optionChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 20,

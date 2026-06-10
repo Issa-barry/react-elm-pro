@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useState } from 'react';
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -10,6 +11,8 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+
+const MOTIF_OPTIONS = ['Après production', 'Correction', 'Retour de produit', 'Perte'];
 
 import { useTheme } from '@/shared/contexts/ThemeContext';
 import { useAjusterStock } from '../hooks/useAjusterStock';
@@ -51,6 +54,72 @@ function FormattedNumberInput({
   );
 }
 
+function MotifPicker({
+  value,
+  onChange,
+  error,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  error?: boolean;
+}) {
+  const { colors } = useTheme();
+  const [open, setOpen] = useState(false);
+
+  return (
+    <View>
+      <TouchableOpacity
+        style={[
+          styles.picker,
+          {
+            backgroundColor: colors.surface,
+            borderColor: error ? colors.danger : open ? colors.primary : colors.border,
+          },
+        ]}
+        onPress={() => setOpen(v => !v)}
+        activeOpacity={0.8}
+      >
+        <Text style={[styles.pickerText, { color: value ? colors.text : colors.textMuted }]}>
+          {value || 'Sélectionner un motif…'}
+        </Text>
+        <Ionicons
+          name={open ? 'chevron-up' : 'chevron-down'}
+          size={18}
+          color={colors.textMuted}
+        />
+      </TouchableOpacity>
+
+      {open && (
+        <View style={[styles.pickerList, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+          {MOTIF_OPTIONS.map(opt => (
+            <TouchableOpacity
+              key={opt}
+              style={[
+                styles.pickerOption,
+                value === opt && { backgroundColor: colors.infoBg },
+                { borderBottomColor: colors.borderLight },
+              ]}
+              onPress={() => { onChange(opt); setOpen(false); }}
+              activeOpacity={0.7}
+            >
+              <Text style={[styles.pickerOptionText, { color: value === opt ? colors.primary : colors.text }]}>
+                {opt}
+              </Text>
+              {value === opt && (
+                <Ionicons name="checkmark" size={16} color={colors.primary} />
+              )}
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
+
+      {error && (
+        <Text style={[styles.fieldError, { color: colors.danger }]}>Le motif est obligatoire</Text>
+      )}
+    </View>
+  );
+}
+
 interface AjusterStockModalProps {
   visible: boolean;
   onClose: () => void;
@@ -69,7 +138,7 @@ export default function AjusterStockModal({
     augmenter, setAugmenter,
     diminuer, setDiminuer,
     motif, setMotif,
-    submit, loading, error,
+    submit, loading, error, motifError,
   } = useAjusterStock(produit);
 
   async function handleSubmit() {
@@ -154,19 +223,9 @@ export default function AjusterStockModal({
           {/* Motif */}
           <View style={styles.motifContainer}>
             <Text style={[styles.labelText, { color: colors.text }]}>
-              Motif <Text style={{ color: colors.textMuted, fontWeight: '400' }}>(optionnel)</Text>
+              Motif <Text style={{ color: colors.danger, fontWeight: '700' }}>*</Text>
             </Text>
-            <TextInput
-              style={[
-                styles.input,
-                styles.motifInput,
-                { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text },
-              ]}
-              placeholder="Ex : inventaire, correction, retour..."
-              placeholderTextColor={colors.textMuted}
-              value={motif}
-              onChangeText={setMotif}
-            />
+            <MotifPicker value={motif} onChange={setMotif} error={motifError} />
           </View>
 
           {error ? (
@@ -250,7 +309,33 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   motifContainer: { gap: 6 },
-  motifInput:     {},
+
+  picker: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 13,
+  },
+  pickerText: { fontSize: 14, fontWeight: '500', flex: 1 },
+  pickerList: {
+    borderWidth: 1,
+    borderRadius: 10,
+    marginTop: 4,
+    overflow: 'hidden',
+  },
+  pickerOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 14,
+    paddingVertical: 13,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  pickerOptionText: { fontSize: 14 },
+  fieldError: { fontSize: 12, marginTop: 4 },
 
   error: { fontSize: 13 },
 

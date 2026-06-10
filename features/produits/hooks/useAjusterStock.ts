@@ -8,6 +8,7 @@ export function useAjusterStock(produit: Produit) {
   const [motif, setMotif]            = useState('');
   const [loading, setLoading]        = useState(false);
   const [error, setError]            = useState<string | null>(null);
+  const [motifError, setMotifError]  = useState(false);
 
   const setAugmenter = useCallback((val: string) => {
     setAugmenterRaw(val);
@@ -19,14 +20,24 @@ export function useAjusterStock(produit: Produit) {
     if (val) setAugmenterRaw('');
   }, []);
 
+  const handleSetMotif = useCallback((val: string) => {
+    setMotif(val);
+    if (val) setMotifError(false);
+  }, []);
+
   const submit = useCallback(async (): Promise<boolean> => {
+    if (!motif.trim()) {
+      setMotifError(true);
+      return false;
+    }
+    setMotifError(false);
     setLoading(true);
     setError(null);
     try {
       const payload: { augmenter?: number; diminuer?: number; motif?: string } = {};
       if (augmenter) payload.augmenter = Number(augmenter);
       if (diminuer) payload.diminuer = Number(diminuer);
-      if (motif.trim()) payload.motif = motif.trim();
+      payload.motif = motif.trim();
 
       const result = await ajusterStock(produit.id, payload);
       if (!result.ok) {
@@ -39,5 +50,5 @@ export function useAjusterStock(produit: Produit) {
     }
   }, [produit.id, augmenter, diminuer, motif]);
 
-  return { augmenter, setAugmenter, diminuer, setDiminuer, motif, setMotif, submit, loading, error };
+  return { augmenter, setAugmenter, diminuer, setDiminuer, motif, setMotif: handleSetMotif, submit, loading, error, motifError };
 }
