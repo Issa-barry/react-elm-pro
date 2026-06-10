@@ -103,7 +103,7 @@ function ThemedApp() {
         <Stack.Screen name="ventes"              options={{ headerShown: false }} />
         <Stack.Screen name="vehicules"           options={{ headerShown: false }} />
         <Stack.Screen name="produits"            options={{ headerShown: false }} />
-        <Stack.Screen name="produits/[id]"          options={{ title: 'Détail produit' }} />
+        <Stack.Screen name="produits/[id]"          options={{ headerShown: false }} />
         <Stack.Screen name="produits/create"        options={{ title: 'Nouveau produit' }} />
         <Stack.Screen name="produits/[id]/modifier"   options={{ title: 'Modifier le produit' }} />
         <Stack.Screen name="produits/[id]/historique" options={{ headerShown: false }} />

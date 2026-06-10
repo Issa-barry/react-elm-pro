@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { router, Stack, useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
@@ -23,6 +23,11 @@ import { deleteProduit } from '../services/produits-api.service';
 function formatPrix(val: number | null): string {
   if (val == null) return '—';
   return new Intl.NumberFormat('fr-FR').format(val) + ' GNF';
+}
+
+function formatQte(val: number | null | undefined): string {
+  if (val == null) return '—';
+  return new Intl.NumberFormat('fr-FR').format(val);
 }
 
 function InfoRow({ label, value }: { label: string; value: string }) {
@@ -83,18 +88,29 @@ export default function ProduitDetailScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <Stack.Screen
-        options={{
-          headerRight: () => produit?.type_has_stock ? (
+      {/* Header custom */}
+      <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border, paddingTop: insets.top }]}>
+        <TouchableOpacity style={styles.headerBtn} onPress={() => router.back()} activeOpacity={0.7}>
+          <Ionicons name="chevron-back" size={24} color={colors.primary} />
+          <Text style={[styles.backLabel, { color: colors.primary }]}>Retour</Text>
+        </TouchableOpacity>
+        <Text style={[styles.headerTitle, { color: colors.text }]} numberOfLines={1}>
+          {produit ? produit.nom : 'Détail produit'}
+        </Text>
+        <View style={styles.headerRight}>
+          {produit?.type_has_stock ? (
             <TouchableOpacity
+              style={styles.headerIconBtn}
               onPress={() => router.push({ pathname: '/produits/[id]/historique', params: { id } })}
-              accessibilityLabel="Historique"
-              style={{ paddingHorizontal: 8 }}>
+              activeOpacity={0.7}
+            >
               <Ionicons name="time-outline" size={22} color={colors.primary} />
             </TouchableOpacity>
-          ) : null,
-        }}
-      />
+          ) : (
+            <View style={styles.headerIconBtn} />
+          )}
+        </View>
+      </View>
       {loading ? (
         <View style={styles.center}>
           <ActivityIndicator color={colors.primary} />
@@ -169,9 +185,9 @@ export default function ProduitDetailScreen() {
             <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
               <Text style={[styles.sectionTitle, { color: colors.text }]}>Stock</Text>
               <View style={[styles.divider, { backgroundColor: colors.border }]} />
-              <InfoRow label="Quantité en stock" value={String(produit.qte_stock ?? 0)} />
+              <InfoRow label="Quantité en stock" value={formatQte(produit.qte_stock)} />
               <View style={[styles.divider, { backgroundColor: colors.borderLight }]} />
-              <InfoRow label="Seuil d'alerte" value={String(produit.seuil_alerte_stock ?? '—')} />
+              <InfoRow label="Seuil d'alerte" value={formatQte(produit.seuil_alerte_stock)} />
               {produit.is_low_stock && (
                 <View style={[styles.alertBanner, { backgroundColor: colors.warningBg }]}>
                   <Ionicons name="warning-outline" size={14} color={colors.warning} />
@@ -254,6 +270,21 @@ export default function ProduitDetailScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
+
+  // Header
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 4,
+    paddingBottom: 10,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  headerBtn:     { flexDirection: 'row', alignItems: 'center', minWidth: 80, paddingHorizontal: 8, paddingVertical: 4 },
+  backLabel:     { fontSize: 16 },
+  headerTitle:   { flex: 1, textAlign: 'center', fontSize: 16, fontWeight: '700' },
+  headerRight:   { minWidth: 80, alignItems: 'flex-end' },
+  headerIconBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
+
   center:           { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24 },
   retryBtn:         { marginTop: 12, paddingHorizontal: 20, paddingVertical: 8, borderRadius: 8, borderWidth: 1 },
   imageWrapper:     { width: '100%', height: 260, alignItems: 'center', justifyContent: 'center' },

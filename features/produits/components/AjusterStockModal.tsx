@@ -15,6 +15,42 @@ import { useTheme } from '@/shared/contexts/ThemeContext';
 import { useAjusterStock } from '../hooks/useAjusterStock';
 import type { Produit } from '../types/produit.types';
 
+function formatDisplay(raw: string): string {
+  if (!raw) return '';
+  const n = parseInt(raw, 10);
+  return isNaN(n) ? '' : new Intl.NumberFormat('fr-FR').format(n);
+}
+
+function FormattedNumberInput({
+  value,
+  onChangeText,
+  style,
+  placeholder,
+  placeholderTextColor,
+}: {
+  value: string;
+  onChangeText: (v: string) => void;
+  style: object | object[];
+  placeholder: string;
+  placeholderTextColor: string;
+}) {
+  function handleChange(text: string) {
+    // Ne garder que les chiffres
+    const raw = text.replace(/\D/g, '');
+    onChangeText(raw);
+  }
+  return (
+    <TextInput
+      style={style}
+      value={formatDisplay(value)}
+      onChangeText={handleChange}
+      placeholder={placeholder}
+      placeholderTextColor={placeholderTextColor}
+      keyboardType="number-pad"
+    />
+  );
+}
+
 interface AjusterStockModalProps {
   visible: boolean;
   onClose: () => void;
@@ -79,7 +115,7 @@ export default function AjusterStockModal({
             <View style={styles.stockBox}>
               <Text style={[styles.stockLabel, { color: colors.textMuted }]}>Stock actuel</Text>
               <Text style={[styles.stockValue, { color: colors.text }]}>
-                {produit.qte_stock ?? 0}
+                {new Intl.NumberFormat('fr-FR').format(produit.qte_stock ?? 0)}
               </Text>
             </View>
           </View>
@@ -91,11 +127,10 @@ export default function AjusterStockModal({
                 <Ionicons name="arrow-up" size={15} color={colors.success} />
                 <Text style={[styles.labelText, { color: colors.success }]}>Augmenter</Text>
               </View>
-              <TextInput
+              <FormattedNumberInput
                 style={[styles.input, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text }]}
                 placeholder="0"
                 placeholderTextColor={colors.textMuted}
-                keyboardType="numeric"
                 value={augmenter}
                 onChangeText={setAugmenter}
               />
@@ -106,11 +141,10 @@ export default function AjusterStockModal({
                 <Ionicons name="arrow-down" size={15} color={colors.danger} />
                 <Text style={[styles.labelText, { color: colors.danger }]}>Diminuer</Text>
               </View>
-              <TextInput
+              <FormattedNumberInput
                 style={[styles.input, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text }]}
                 placeholder="0"
                 placeholderTextColor={colors.textMuted}
-                keyboardType="numeric"
                 value={diminuer}
                 onChangeText={setDiminuer}
               />
@@ -211,7 +245,9 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingHorizontal: 12,
     paddingVertical: 11,
-    fontSize: 14,
+    fontSize: 20,
+    fontWeight: '700',
+    textAlign: 'center',
   },
   motifContainer: { gap: 6 },
   motifInput:     {},
