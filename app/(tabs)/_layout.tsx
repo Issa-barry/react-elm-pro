@@ -44,6 +44,10 @@ export default function TabLayout() {
         name="notifications"
         options={{ title: 'Notifications', tabBarIcon: IconNotifications }}
       />
+      <Tabs.Screen
+        name="logistique"
+        options={{ href: null }}
+      />
     </Tabs>
   );
 }
