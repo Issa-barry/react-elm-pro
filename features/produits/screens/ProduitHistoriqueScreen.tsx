@@ -17,6 +17,11 @@ import type { AuditEntry, MouvementStock } from '../types/produit.types';
 
 type Tab = 'stock' | 'global';
 
+function formatNum(val: number | null | undefined): string {
+  if (val == null) return '—';
+  return new Intl.NumberFormat('fr-FR').format(val);
+}
+
 function formatDate(iso: string): string {
   const d = new Date(iso);
   return (
@@ -46,10 +51,10 @@ function MouvementItem({ item }: { item: MouvementStock }) {
       <View style={styles.itemBody}>
         <View style={styles.itemTop}>
           <Text style={[styles.itemQty, { color }]}>
-            {qtyPrefix}{item.quantite}
+            {qtyPrefix}{formatNum(item.quantite)}
           </Text>
           <Text style={[styles.itemStock, { color: colors.textMuted }]}>
-            {item.stock_avant} → {item.stock_apres}
+            {formatNum(item.stock_avant)} → {formatNum(item.stock_apres)}
           </Text>
         </View>
         {item.notes ? (

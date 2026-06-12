@@ -23,6 +23,7 @@ export interface Produit {
   is_alerte: boolean;
   in_stock: boolean;
   is_low_stock: boolean;
+  is_used: boolean;
   archived_at: string | null;
   created_at: string | null;
   updated_at: string | null;

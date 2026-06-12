@@ -18,7 +18,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/shared/contexts/ThemeContext';
 import AjusterStockModal from '../components/AjusterStockModal';
 import { useProduitDetail } from '../hooks/useProduitDetail';
-import { deleteProduit } from '../services/produits-api.service';
+import { archiverProduit, deleteProduit } from '../services/produits-api.service';
 
 function formatPrix(val: number | null): string {
   if (val == null) return '—';
@@ -53,6 +53,7 @@ export default function ProduitDetailScreen() {
   const { produit, loading, error, reload } = useProduitDetail(id ?? '');
   const [showAjuster, setShowAjuster] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [archiving, setArchiving] = useState(false);
   const [imageZoomed, setImageZoomed] = useState(false);
 
   useFocusEffect(useCallback(() => { reload(); }, [reload]));
@@ -77,6 +78,30 @@ export default function ProduitDetailScreen() {
             setDeleting(false);
             if (result.ok) {
               router.back();
+            } else {
+              Alert.alert('Erreur', result.error);
+            }
+          },
+        },
+      ]
+    );
+  }
+
+  function handleArchiver() {
+    Alert.alert(
+      'Archiver le produit',
+      `Archiver "${produit?.nom}" ? Le produit ne sera plus actif mais ses données seront conservées.`,
+      [
+        { text: 'Annuler', style: 'cancel' },
+        {
+          text: 'Archiver',
+          onPress: async () => {
+            if (!id) return;
+            setArchiving(true);
+            const result = await archiverProduit(id);
+            setArchiving(false);
+            if (result.ok) {
+              reload();
             } else {
               Alert.alert('Erreur', result.error);
             }
@@ -216,20 +241,39 @@ export default function ProduitDetailScreen() {
               <Text style={styles.actionBtnText}>Modifier</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity
-              style={[styles.actionBtn, { backgroundColor: colors.dangerBg }]}
-              onPress={handleSupprimer}
-              disabled={deleting}
-            >
-              {deleting ? (
-                <ActivityIndicator color={colors.danger} size="small" />
-              ) : (
-                <>
-                  <Ionicons name="trash-outline" size={18} color={colors.danger} />
-                  <Text style={[styles.actionBtnText, { color: colors.danger }]}>Supprimer</Text>
-                </>
-              )}
-            </TouchableOpacity>
+            {produit.is_used ? (
+              produit.statut !== 'archive' && (
+                <TouchableOpacity
+                  style={[styles.actionBtn, { backgroundColor: colors.warningBg }]}
+                  onPress={handleArchiver}
+                  disabled={archiving}
+                >
+                  {archiving ? (
+                    <ActivityIndicator color={colors.warning} size="small" />
+                  ) : (
+                    <>
+                      <Ionicons name="archive-outline" size={18} color={colors.warning} />
+                      <Text style={[styles.actionBtnText, { color: colors.warning }]}>Archiver</Text>
+                    </>
+                  )}
+                </TouchableOpacity>
+              )
+            ) : (
+              <TouchableOpacity
+                style={[styles.actionBtn, { backgroundColor: colors.dangerBg }]}
+                onPress={handleSupprimer}
+                disabled={deleting}
+              >
+                {deleting ? (
+                  <ActivityIndicator color={colors.danger} size="small" />
+                ) : (
+                  <>
+                    <Ionicons name="trash-outline" size={18} color={colors.danger} />
+                    <Text style={[styles.actionBtnText, { color: colors.danger }]}>Supprimer</Text>
+                  </>
+                )}
+              </TouchableOpacity>
+            )}
           </View>
         </ScrollView>
       )}

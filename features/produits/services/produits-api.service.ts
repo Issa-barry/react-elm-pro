@@ -177,6 +177,20 @@ export async function updateProduit(id: string, data: ProduitFormData): Promise<
   }
 }
 
+export async function archiverProduit(id: string): Promise<ApiResult<Produit>> {
+  try {
+    const res = await fetch(`${API_URL}/api/v1/backoffice/produits/${id}/archiver`, {
+      method: 'PATCH',
+      headers: await headers(),
+    });
+    const json = await res.json();
+    if (!res.ok) return { ok: false, error: json.message ?? 'Erreur archivage produit' };
+    return { ok: true, data: json.data ?? json };
+  } catch {
+    return { ok: false, error: 'Erreur réseau' };
+  }
+}
+
 export async function deleteProduit(id: string): Promise<ApiResult<void>> {
   try {
     const res = await fetch(`${API_URL}/api/v1/backoffice/produits/${id}`, {
