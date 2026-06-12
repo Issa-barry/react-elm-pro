@@ -1,4 +1,4 @@
-import { router, useLocalSearchParams } from 'expo-router';
+import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
@@ -30,6 +30,7 @@ function formatDate(iso: string | null): string {
 
 function InfoRow({ label, value }: { label: string; value: string }) {
   const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   return (
     <View style={styles.infoRow}>
       <Text style={[styles.infoLabel, { color: colors.textMuted }]}>{label}</Text>
@@ -40,6 +41,7 @@ function InfoRow({ label, value }: { label: string; value: string }) {
 
 function LigneCard({ ligne }: { ligne: TransfertLigne }) {
   const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const ecartColors: Record<string, string> = {
     conforme: colors.success,
     casse: colors.danger,
@@ -146,6 +148,7 @@ export default function TransfertDetailScreen() {
   if (loading) {
     return (
       <View style={[styles.root, { paddingTop: insets.top }]}>
+        <Stack.Screen options={{ headerShown: false }} />
         <View style={[styles.header, { borderBottomColor: colors.border }]}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
             <Text style={[styles.backLabel, { color: colors.primary }]}>‹ Retour</Text>
@@ -159,6 +162,7 @@ export default function TransfertDetailScreen() {
   if (error || !transfert) {
     return (
       <View style={[styles.root, { paddingTop: insets.top }]}>
+        <Stack.Screen options={{ headerShown: false }} />
         <View style={[styles.header, { borderBottomColor: colors.border }]}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
             <Text style={[styles.backLabel, { color: colors.primary }]}>‹ Retour</Text>
@@ -180,6 +184,7 @@ export default function TransfertDetailScreen() {
 
   return (
     <View style={[styles.root, { paddingTop: insets.top }]}>
+      <Stack.Screen options={{ headerShown: false }} />
       <View style={[styles.header, { borderBottomColor: colors.border }]}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
           <Text style={[styles.backLabel, { color: colors.primary }]}>‹ Retour</Text>

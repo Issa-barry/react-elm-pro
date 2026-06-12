@@ -1,10 +1,10 @@
-import { router, useFocusEffect } from 'expo-router';
+import { Stack, router, useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
-  FlatList,
   RefreshControl,
   ScrollView,
+  SectionList,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -16,6 +16,8 @@ import { useTheme } from '@/shared/contexts/ThemeContext';
 import { StatutBadge } from '../components/StatutBadge';
 import { useTransferts } from '../hooks/useTransferts';
 import type { StatutTransfert, Transfert } from '../types/logistique.types';
+
+const STATUT_ORDER: StatutTransfert[] = ['brouillon', 'chargement', 'transit', 'reception', 'cloture', 'annule'];
 
 const FILTRES: { value: StatutTransfert | ''; label: string }[] = [
   { value: '',           label: 'Tous' },
@@ -34,6 +36,7 @@ function formatDate(iso: string | null): string {
 
 function TransfertCard({ item, onPress }: { item: Transfert; onPress: () => void }) {
   const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   return (
     <TouchableOpacity
       style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}
@@ -70,8 +73,24 @@ export default function AllTransfertsScreen() {
   useEffect(() => { load(); }, [load]);
   useFocusEffect(useCallback(() => { refetch(); }, [refetch]));
 
+  const sections = useMemo(() => {
+    if (statut) {
+      return [{ title: FILTRES.find(f => f.value === statut)?.label ?? '', data: transferts }];
+    }
+    const grouped = new Map<StatutTransfert, Transfert[]>();
+    for (const t of transferts) {
+      const list = grouped.get(t.statut as StatutTransfert) ?? [];
+      list.push(t);
+      grouped.set(t.statut as StatutTransfert, list);
+    }
+    return STATUT_ORDER
+      .filter(s => grouped.has(s))
+      .map(s => ({ title: grouped.get(s)![0].statut_label, data: grouped.get(s)! }));
+  }, [transferts, statut]);
+
   return (
     <View style={[styles.root, { paddingTop: insets.top }]}>
+      <Stack.Screen options={{ headerShown: false }} />
       <View style={[styles.header, { borderBottomColor: colors.border }]}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
           <Text style={[styles.backLabel, { color: colors.primary }]}>‹ Retour</Text>
@@ -115,8 +134,8 @@ export default function AllTransfertsScreen() {
           </TouchableOpacity>
         </View>
       ) : (
-        <FlatList
-          data={transferts}
+        <SectionList
+          sections={sections}
           keyExtractor={item => item.id}
           renderItem={({ item }) => (
             <TransfertCard
@@ -124,8 +143,21 @@ export default function AllTransfertsScreen() {
               onPress={() => router.push(`/logistique/${item.id}` as never)}
             />
           )}
+          renderSectionHeader={({ section }) =>
+            sections.length > 1 ? (
+              <View style={[styles.sectionHeader, { backgroundColor: colors.background }]}>
+                <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>
+                  {section.title.toUpperCase()}
+                </Text>
+                <Text style={[styles.sectionCount, { color: colors.textMuted }]}>
+                  {section.data.length}
+                </Text>
+              </View>
+            ) : null
+          }
           contentContainerStyle={[styles.list, { paddingBottom: insets.bottom + 24 }]}
           showsVerticalScrollIndicator={false}
+          stickySectionHeadersEnabled={false}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={refetch} colors={[colors.primary]} tintColor={colors.primary} />
           }
@@ -159,6 +191,9 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     chipLabel:      { fontSize: 13, fontWeight: '600' },
 
     list:    { padding: 16, gap: 12 },
+    sectionHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 6, paddingHorizontal: 2, marginBottom: 4, marginTop: 8 },
+    sectionTitle:  { fontSize: 11, fontWeight: '700', letterSpacing: 0.8 },
+    sectionCount:  { fontSize: 12, fontWeight: '600' },
     center:  { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12, padding: 24 },
     card: {
       borderRadius: 14,

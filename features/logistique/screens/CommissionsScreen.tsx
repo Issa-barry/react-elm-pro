@@ -1,4 +1,4 @@
-import { router, useFocusEffect } from 'expo-router';
+import { Stack, router, useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useMemo } from 'react';
 import {
   ActivityIndicator,
@@ -28,6 +28,7 @@ function statutColor(statut: string, colors: ReturnType<typeof useTheme>['colors
 
 function CommissionCard({ item }: { item: Commission }) {
   const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const c = statutColor(item.statut, colors);
 
   return (
@@ -88,6 +89,7 @@ export default function CommissionsScreen() {
 
   return (
     <View style={[styles.root, { paddingTop: insets.top }]}>
+      <Stack.Screen options={{ headerShown: false }} />
       <View style={[styles.header, { borderBottomColor: colors.border }]}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
           <Text style={[styles.backLabel, { color: colors.primary }]}>‹ Retour</Text>

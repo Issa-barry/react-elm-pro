@@ -158,9 +158,6 @@ export default function AjusterStockModal({
       >
         <View style={[styles.sheet, { backgroundColor: colors.background }]}>
 
-          {/* Barre de drag */}
-          <View style={[styles.dragBar, { backgroundColor: colors.border }]} />
-
           {/* Titre */}
           <Text style={[styles.sheetTitle, { color: colors.text }]}>Ajuster le stock</Text>
 
@@ -253,6 +250,9 @@ export default function AjusterStockModal({
             </TouchableOpacity>
           </View>
 
+          {/* Barre de drag */}
+          <View style={[styles.dragBar, { backgroundColor: colors.border }]} />
+
         </View>
       </KeyboardAvoidingView>
     </Modal>
@@ -261,17 +261,17 @@ export default function AjusterStockModal({
 
 const styles = StyleSheet.create({
   backdrop:    { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)' },
-  keyboardView:{ position: 'absolute', bottom: 0, left: 0, right: 0 },
+  keyboardView:{ position: 'absolute', top: 0, left: 0, right: 0 },
   sheet: {
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
     padding: 20,
-    paddingBottom: 36,
+    paddingTop: 52,
     gap: 16,
   },
   dragBar: {
     width: 40, height: 4, borderRadius: 2,
-    alignSelf: 'center', marginBottom: 4,
+    alignSelf: 'center', marginTop: 4,
   },
   sheetTitle: { fontSize: 18, fontWeight: '700' },
 
