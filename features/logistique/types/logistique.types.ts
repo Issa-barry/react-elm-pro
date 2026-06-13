@@ -1,3 +1,33 @@
+export interface SiteRef {
+  id: string;
+  nom: string;
+  code: string;
+  type: string;
+}
+
+export interface VehiculeRef {
+  id: string;
+  nom_vehicule: string;
+  immatriculation: string;
+}
+
+export interface ProduitRef {
+  id: string;
+  nom: string;
+  code_interne: string | null;
+  image_url: string | null;
+}
+
+export interface CreateTransfertInput {
+  site_source_id: string;
+  site_destination_id: string;
+  vehicule_id?: string;
+  date_depart_prevue?: string;
+  date_arrivee_prevue?: string;
+  notes?: string;
+  lignes: { produit_id: string; quantite_demandee: number }[];
+}
+
 export type StatutTransfert =
   | 'brouillon'
   | 'chargement'

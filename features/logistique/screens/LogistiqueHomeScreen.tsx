@@ -54,8 +54,19 @@ export default function LogistiqueHomeScreen() {
   return (
     <View style={[styles.root, { paddingTop: insets.top }]}>
       <View style={[styles.header, { borderBottomColor: colors.border }]}>
-        <Text style={[styles.title, { color: colors.text }]}>Logistique</Text>
-        <Text style={[styles.subtitle, { color: colors.textMuted }]}>Gestion des transferts</Text>
+        <View style={styles.headerRow}>
+          <View>
+            <Text style={[styles.title, { color: colors.text }]}>Logistique</Text>
+            <Text style={[styles.subtitle, { color: colors.textMuted }]}>Gestion des transferts</Text>
+          </View>
+          <TouchableOpacity
+            style={[styles.newBtn, { backgroundColor: colors.primary }]}
+            onPress={() => router.push('/logistique/create')}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.newBtnText}>+ Nouveau</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       <ScrollView
@@ -91,10 +102,13 @@ export default function LogistiqueHomeScreen() {
 
 function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
   return StyleSheet.create({
-    root:    { flex: 1, backgroundColor: colors.background },
-    header:  { paddingHorizontal: 20, paddingVertical: 16, borderBottomWidth: StyleSheet.hairlineWidth },
-    title:   { fontSize: 24, fontWeight: '700' },
-    subtitle: { fontSize: 14, marginTop: 2 },
+    root:      { flex: 1, backgroundColor: colors.background },
+    header:    { paddingHorizontal: 20, paddingVertical: 16, borderBottomWidth: StyleSheet.hairlineWidth },
+    headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+    title:     { fontSize: 24, fontWeight: '700' },
+    subtitle:  { fontSize: 14, marginTop: 2 },
+    newBtn:    { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20 },
+    newBtnText: { color: '#fff', fontWeight: '700', fontSize: 14 },
     content: { padding: 16, gap: 12 },
     card: {
       flexDirection: 'row',

@@ -119,8 +119,10 @@ function ThemedApp() {
         <Stack.Screen name="produits/[id]"          options={{ headerShown: false }} />
         <Stack.Screen name="produits/create"        options={{ title: 'Nouveau produit' }} />
         <Stack.Screen name="produits/[id]/modifier"   options={{ title: 'Modifier le produit' }} />
-        <Stack.Screen name="produits/[id]/historique" options={{ headerShown: false }} />
+        <Stack.Screen name="produits/[id]/historique"    options={{ headerShown: false }} />
+        <Stack.Screen name="produits/[id]/ajuster-stock" options={{ headerShown: false }} />
         <Stack.Screen name="logistique"          options={{ headerShown: false }} />
+        <Stack.Screen name="logistique/create"   options={{ headerShown: false }} />
       </Stack>
       <StatusBar style={isDark ? 'light' : 'dark'} backgroundColor={colors.surface} />
     </ThemeProvider>

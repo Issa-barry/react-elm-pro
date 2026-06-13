@@ -198,7 +198,7 @@ describe('ajusterStock', () => {
       ok: true,
       json: async () => ({ data: { ...PRODUIT, qte_stock: 110 } }),
     });
-    const result = await ajusterStock('p1', { augmenter: 10, motif: 'Réapprovisionnement' });
+    const result = await ajusterStock('p1', { augmenter: 10, motif_type: 'correction_stock' });
     expect(result.ok).toBe(true);
     if (result.ok) {
       expect(result.data.qte_stock).toBe(110);
@@ -213,7 +213,7 @@ describe('ajusterStock', () => {
         errors: { augmenter: ['La quantité doit être positive.'] },
       }),
     });
-    const result = await ajusterStock('p1', { augmenter: -5 });
+    const result = await ajusterStock('p1', { augmenter: -5, motif_type: 'correction_stock' });
     expect(result.ok).toBe(false);
     if (!result.ok) {
       expect(result.error).toContain('La quantité doit être positive.');
@@ -225,7 +225,7 @@ describe('ajusterStock', () => {
       ok: true,
       json: async () => ({ data: PRODUIT }),
     });
-    await ajusterStock('p1', { augmenter: 5 });
+    await ajusterStock('p1', { augmenter: 5, motif_type: 'correction_stock' });
     const [url, options] = (global.fetch as jest.Mock).mock.calls[0];
     expect(url).toContain('/api/v1/backoffice/produits/p1/ajuster-stock');
     expect(options.method).toBe('POST');

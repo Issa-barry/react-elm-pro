@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
-import { useMemo, useState } from 'react';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -17,10 +17,8 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '@/shared/contexts/ThemeContext';
-import AjusterStockModal from '../components/AjusterStockModal';
 import ProduitCard from '../components/ProduitCard';
 import { useProduits } from '../hooks/useProduits';
-import type { Produit } from '../types/produit.types';
 
 type StatutFilter = 'tous' | 'actif' | 'inactif' | 'archive';
 type TypeFilter   = 'materiel' | 'service' | 'fabricable' | 'achat_vente';
@@ -205,12 +203,13 @@ export default function ProduitsScreen() {
   const insets = useSafeAreaInsets();
   const { produits, loading, error, reload } = useProduits();
 
-  const [modalProduit, setModalProduit] = useState<Produit | null>(null);
-  const [showFilter, setShowFilter]     = useState(false);
+  const [showFilter, setShowFilter] = useState(false);
   const [search, setSearch]             = useState('');
   const [statutFilter, setStatutFilter] = useState<StatutFilter>('tous');
   const [typeFilter, setTypeFilter]     = useState<TypeFilter[]>([]);
   const [alerteOnly, setAlerteOnly]     = useState(false);
+
+  useFocusEffect(useCallback(() => { reload(); }, [reload]));
 
   const activeFilterCount = (statutFilter !== 'tous' ? 1 : 0) + (typeFilter.length > 0 ? 1 : 0) + (alerteOnly ? 1 : 0);
 
@@ -327,7 +326,7 @@ export default function ProduitsScreen() {
             <ProduitCard
               produit={item}
               onPress={() => router.push({ pathname: '/produits/[id]', params: { id: item.id } })}
-              onAjusterStock={item.type_has_stock ? () => setModalProduit(item) : undefined}
+              onAjusterStock={item.type_has_stock ? () => router.push({ pathname: '/produits/[id]/ajuster-stock', params: { id: item.id } }) : undefined}
             />
           )}
           refreshControl={
@@ -344,16 +343,6 @@ export default function ProduitsScreen() {
           contentContainerStyle={filtered.length === 0 ? styles.emptyContainer : styles.listContent}
         />
       )}
-
-      {/* ── Ajuster stock modal ── */}
-      {modalProduit ? (
-        <AjusterStockModal
-          visible={true}
-          produit={modalProduit}
-          onClose={() => setModalProduit(null)}
-          onSuccess={reload}
-        />
-      ) : null}
 
       {/* ── Filter sheet ── */}
       <FilterModal

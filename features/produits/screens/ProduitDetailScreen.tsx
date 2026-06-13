@@ -16,7 +16,6 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '@/shared/contexts/ThemeContext';
-import AjusterStockModal from '../components/AjusterStockModal';
 import { useProduitDetail } from '../hooks/useProduitDetail';
 import { archiverProduit, deleteProduit } from '../services/produits-api.service';
 
@@ -51,7 +50,6 @@ export default function ProduitDetailScreen() {
   const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { produit, loading, error, reload } = useProduitDetail(id ?? '');
-  const [showAjuster, setShowAjuster] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [archiving, setArchiving] = useState(false);
   const [imageZoomed, setImageZoomed] = useState(false);
@@ -226,7 +224,7 @@ export default function ProduitDetailScreen() {
             {produit.type_has_stock && (
               <TouchableOpacity
                 style={[styles.actionBtn, { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.primary }]}
-                onPress={() => setShowAjuster(true)}
+                onPress={() => router.push({ pathname: '/produits/[id]/ajuster-stock', params: { id } })}
               >
                 <Ionicons name="swap-vertical-outline" size={18} color={colors.primary} />
                 <Text style={[styles.actionBtnText, { color: colors.primary }]}>Ajuster le stock</Text>
@@ -277,15 +275,6 @@ export default function ProduitDetailScreen() {
           </View>
         </ScrollView>
       )}
-
-      {produit && showAjuster ? (
-        <AjusterStockModal
-          visible={showAjuster}
-          produit={produit}
-          onClose={() => setShowAjuster(false)}
-          onSuccess={reload}
-        />
-      ) : null}
 
       <Modal
         visible={imageZoomed}

@@ -45,10 +45,40 @@ export interface ProduitFormData {
   image?: { uri: string; name: string; type: string } | null;
 }
 
+export type MotifAjustementStock =
+  | 'apres_production'
+  | 'retour'
+  | 'perte'
+  | 'casse'
+  | 'don'
+  | 'correction_stock'
+  | 'autre';
+
+export interface MotifOption {
+  label: string;
+  value: MotifAjustementStock;
+}
+
+export const MOTIFS_AUGMENTATION: MotifOption[] = [
+  { label: 'Après production',    value: 'apres_production' },
+  { label: 'Retour',              value: 'retour' },
+  { label: 'Correction de stock', value: 'correction_stock' },
+  { label: 'Autre',               value: 'autre' },
+];
+
+export const MOTIFS_DIMINUTION: MotifOption[] = [
+  { label: 'Perte',               value: 'perte' },
+  { label: 'Casse',               value: 'casse' },
+  { label: 'Don',                 value: 'don' },
+  { label: 'Correction de stock', value: 'correction_stock' },
+  { label: 'Autre',               value: 'autre' },
+];
+
 export interface AjusterStockData {
   augmenter?: number;
   diminuer?: number;
-  motif?: string;
+  motif_type: MotifAjustementStock;
+  motif_detail?: string;
 }
 
 export interface MouvementStock {

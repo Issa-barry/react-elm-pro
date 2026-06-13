@@ -1,6 +1,13 @@
 import { secureStorage } from '@/features/auth/services/secure-storage.service';
 import type { ApiResult } from '@/features/auth/types/auth.types';
-import type { Commission, Transfert } from '../types/logistique.types';
+import type {
+  Commission,
+  CreateTransfertInput,
+  ProduitRef,
+  SiteRef,
+  Transfert,
+  VehiculeRef,
+} from '../types/logistique.types';
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL ?? '';
 
@@ -98,6 +105,48 @@ export async function validationAdmin(
     );
     const json = await res.json();
     if (!res.ok) return { ok: false, error: parseError(json, 'Erreur validation admin') };
+    return { ok: true, data: json.data ?? json };
+  } catch {
+    return { ok: false, error: 'Erreur réseau' };
+  }
+}
+
+export async function fetchRessources(): Promise<ApiResult<{ user_site: SiteRef | null; sites: SiteRef[]; vehicules: VehiculeRef[] }>> {
+  try {
+    const res = await fetch(`${API_URL}/api/v1/backoffice/logistique/ressources`, {
+      headers: await headers(),
+    });
+    const json = await res.json();
+    if (!res.ok) return { ok: false, error: parseError(json, 'Erreur chargement ressources') };
+    return { ok: true, data: json };
+  } catch {
+    return { ok: false, error: 'Erreur réseau' };
+  }
+}
+
+export async function fetchProduits(): Promise<ApiResult<ProduitRef[]>> {
+  try {
+    const res = await fetch(`${API_URL}/api/v1/backoffice/produits`, {
+      headers: await headers(),
+    });
+    const json = await res.json();
+    if (!res.ok) return { ok: false, error: parseError(json, 'Erreur chargement produits') };
+    const data = Array.isArray(json) ? json : (json.data ?? []);
+    return { ok: true, data };
+  } catch {
+    return { ok: false, error: 'Erreur réseau' };
+  }
+}
+
+export async function createTransfert(input: CreateTransfertInput): Promise<ApiResult<Transfert>> {
+  try {
+    const res = await fetch(`${API_URL}/api/v1/backoffice/logistique/transferts`, {
+      method: 'POST',
+      headers: await headers(),
+      body: JSON.stringify(input),
+    });
+    const json = await res.json();
+    if (!res.ok) return { ok: false, error: parseError(json, 'Erreur création transfert') };
     return { ok: true, data: json.data ?? json };
   } catch {
     return { ok: false, error: 'Erreur réseau' };
