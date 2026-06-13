@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { ajusterStock } from '../services/produits-api.service';
 import {
   MOTIFS_AUGMENTATION,
@@ -10,67 +10,62 @@ import {
 const VALEURS_AUGMENTATION = new Set(MOTIFS_AUGMENTATION.map(m => m.value));
 const VALEURS_DIMINUTION   = new Set(MOTIFS_DIMINUTION.map(m => m.value));
 
+export type AjustementDirection = 'augmenter' | 'diminuer' | null;
+
 export function useAjusterStock(produit: Produit) {
-  const [augmenter, setAugmenterRaw] = useState('');
-  const [diminuer, setDiminuerRaw]   = useState('');
+  const [direction, setDirectionRaw] = useState<AjustementDirection>(null);
+  const [quantite, setQuantiteRaw]   = useState('');
   const [motifType, setMotifTypeRaw] = useState<MotifAjustementStock | ''>('');
-  const [motifDetail, setMotifDetail] = useState('');
   const [loading, setLoading]        = useState(false);
   const [error, setError]            = useState<string | null>(null);
   const [motifError, setMotifError]  = useState(false);
-  const [motifDetailError, setMotifDetailError] = useState(false);
+  const [quantiteError, setQuantiteError] = useState(false);
 
-  const setAugmenter = useCallback((val: string) => {
-    setAugmenterRaw(val);
-    if (val) {
-      setDiminuerRaw('');
-      // Réinitialise le motif s'il n'est pas valide pour une augmentation
-      setMotifTypeRaw(prev =>
-        prev && !VALEURS_AUGMENTATION.has(prev) ? '' : prev
-      );
-    }
+  const setDirection = useCallback((dir: AjustementDirection) => {
+    setDirectionRaw(dir);
+    setQuantiteRaw('');
+    setQuantiteError(false);
+    setMotifTypeRaw(prev => {
+      if (!prev) return prev;
+      if (dir === 'augmenter' && !VALEURS_AUGMENTATION.has(prev)) return '';
+      if (dir === 'diminuer'  && !VALEURS_DIMINUTION.has(prev))   return '';
+      return prev;
+    });
+    setMotifError(false);
   }, []);
 
-  const setDiminuer = useCallback((val: string) => {
-    setDiminuerRaw(val);
-    if (val) {
-      setAugmenterRaw('');
-      // Réinitialise le motif s'il n'est pas valide pour une diminution
-      setMotifTypeRaw(prev =>
-        prev && !VALEURS_DIMINUTION.has(prev) ? '' : prev
-      );
-    }
+  const setQuantite = useCallback((val: string) => {
+    setQuantiteRaw(val);
+    if (val) setQuantiteError(false);
   }, []);
 
   const setMotifType = useCallback((val: MotifAjustementStock | '') => {
     setMotifTypeRaw(val);
     if (val) setMotifError(false);
-    if (val !== 'autre') {
-      setMotifDetail('');
-      setMotifDetailError(false);
-    }
   }, []);
 
-  const handleSetMotifDetail = useCallback((val: string) => {
-    setMotifDetail(val);
-    if (val.trim()) setMotifDetailError(false);
-  }, []);
+  const stockActuel = produit.qte_stock ?? 0;
+
+  const stockPreview = useMemo<number | null>(() => {
+    const qty = Number(quantite);
+    if (!direction || !qty || qty <= 0) return null;
+    return direction === 'augmenter'
+      ? stockActuel + qty
+      : stockActuel - qty;
+  }, [direction, quantite, stockActuel]);
 
   const submit = useCallback(async (): Promise<boolean> => {
     let valid = true;
+    const qty = Number(quantite);
+
+    if (!quantite || qty <= 0) {
+      setQuantiteError(true);
+      valid = false;
+    }
 
     if (!motifType) {
       setMotifError(true);
       valid = false;
-    } else {
-      setMotifError(false);
-    }
-
-    if (motifType === 'autre' && !motifDetail.trim()) {
-      setMotifDetailError(true);
-      valid = false;
-    } else {
-      setMotifDetailError(false);
     }
 
     if (!valid) return false;
@@ -81,9 +76,8 @@ export function useAjusterStock(produit: Produit) {
       const payload: Parameters<typeof ajusterStock>[1] = {
         motif_type: motifType as MotifAjustementStock,
       };
-      if (augmenter) payload.augmenter = Number(augmenter);
-      if (diminuer) payload.diminuer = Number(diminuer);
-      if (motifType === 'autre') payload.motif_detail = motifDetail.trim();
+      if (direction === 'augmenter') payload.augmenter = qty;
+      else payload.diminuer = qty;
 
       const result = await ajusterStock(produit.id, payload);
       if (!result.ok) {
@@ -94,22 +88,14 @@ export function useAjusterStock(produit: Produit) {
     } finally {
       setLoading(false);
     }
-  }, [produit.id, augmenter, diminuer, motifType, motifDetail]);
-
-  // Direction courante déduite des champs saisis
-  const direction: 'augmenter' | 'diminuer' | '' = augmenter
-    ? 'augmenter'
-    : diminuer
-      ? 'diminuer'
-      : '';
+  }, [produit.id, direction, quantite, motifType]);
 
   return {
-    augmenter, setAugmenter,
-    diminuer, setDiminuer,
+    direction, setDirection,
+    quantite, setQuantite,
     motifType, setMotifType,
-    motifDetail, setMotifDetail: handleSetMotifDetail,
-    direction,
+    stockPreview,
     submit, loading, error,
-    motifError, motifDetailError,
+    motifError, quantiteError,
   };
 }

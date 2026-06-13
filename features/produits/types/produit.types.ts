@@ -48,11 +48,12 @@ export interface ProduitFormData {
 export type MotifAjustementStock =
   | 'apres_production'
   | 'retour'
+  | 'entree_exceptionnelle'
   | 'perte'
   | 'casse'
   | 'don'
-  | 'correction_stock'
-  | 'autre';
+  | 'sortie_exceptionnelle'
+  | 'correction_stock';
 
 export interface MotifOption {
   label: string;
@@ -60,25 +61,24 @@ export interface MotifOption {
 }
 
 export const MOTIFS_AUGMENTATION: MotifOption[] = [
-  { label: 'Après production',    value: 'apres_production' },
-  { label: 'Retour',              value: 'retour' },
-  { label: 'Correction de stock', value: 'correction_stock' },
-  { label: 'Autre',               value: 'autre' },
+  { label: 'Après production',      value: 'apres_production' },
+  { label: 'Retour',                value: 'retour' },
+  { label: 'Correction de stock',   value: 'correction_stock' },
+  { label: 'Entrée exceptionnelle', value: 'entree_exceptionnelle' },
 ];
 
 export const MOTIFS_DIMINUTION: MotifOption[] = [
-  { label: 'Perte',               value: 'perte' },
-  { label: 'Casse',               value: 'casse' },
-  { label: 'Don',                 value: 'don' },
-  { label: 'Correction de stock', value: 'correction_stock' },
-  { label: 'Autre',               value: 'autre' },
+  { label: 'Perte',                 value: 'perte' },
+  { label: 'Casse',                 value: 'casse' },
+  { label: 'Don',                   value: 'don' },
+  { label: 'Correction de stock',   value: 'correction_stock' },
+  { label: 'Sortie exceptionnelle', value: 'sortie_exceptionnelle' },
 ];
 
 export interface AjusterStockData {
   augmenter?: number;
   diminuer?: number;
   motif_type: MotifAjustementStock;
-  motif_detail?: string;
 }
 
 export interface MouvementStock {

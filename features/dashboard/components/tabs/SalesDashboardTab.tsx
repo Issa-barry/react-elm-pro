@@ -116,7 +116,7 @@ function kpiLabel(id: string): string {
     factures:     'Total Factures',
     payees:       'Factures payées',
     encaissement: 'Reste à encaisser',
-    ventes:       'Nb. ventes',
+    ventes:       'Nb. ventes (commandes)',
     clients:      'Clients actifs',
     produits:     'Produits livrés',
   };
