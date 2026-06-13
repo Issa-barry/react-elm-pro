@@ -3,8 +3,6 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -13,6 +11,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { KEYBOARD_HEIGHT, NumericKeyboard } from '@/shared/components/NumericKeyboard';
 import { useTheme } from '@/shared/contexts/ThemeContext';
 import { AdjustmentConfirmModal } from '../components/adjustment/AdjustmentConfirmModal';
 import { AdjustmentQuantityInput } from '../components/adjustment/AdjustmentQuantityInput';
@@ -23,6 +22,8 @@ import { StockPreviewCard } from '../components/adjustment/StockPreviewCard';
 import { useAjusterStock } from '../hooks/useAjusterStock';
 import { useProduitDetail } from '../hooks/useProduitDetail';
 import type { Produit } from '../types/produit.types';
+
+// ── Form ──────────────────────────────────────────────────────────────────────
 
 function AjusterStockFormInner({ produit }: { produit: Produit }) {
   const { colors } = useTheme();
@@ -39,8 +40,8 @@ function AjusterStockFormInner({ produit }: { produit: Produit }) {
   } = useAjusterStock(produit);
 
   const stockActuel = produit.qte_stock ?? 0;
-
-  const canOpenConfirm = !!direction && !!quantite && parseInt(quantite, 10) > 0 && !!motifType;
+  const canOpenConfirm =
+    !!direction && !!quantite && parseInt(quantite, 10) > 0 && !!motifType;
 
   const handlePressValider = useCallback(() => {
     if (canOpenConfirm) {
@@ -55,35 +56,37 @@ function AjusterStockFormInner({ produit }: { produit: Produit }) {
     if (ok) router.back();
   }, [submit]);
 
+  // Keyboard visible only when a direction is chosen
+  const keyboardVisible = !!direction;
+
   return (
     <>
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      >
+      <View style={styles.flex}>
         <ScrollView
-          contentContainerStyle={styles.scrollContent}
+          contentContainerStyle={[
+            styles.scrollContent,
+            {
+              paddingBottom: keyboardVisible
+                ? KEYBOARD_HEIGHT + insets.bottom + 24
+                : 24,
+            },
+          ]}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
           <StockAdjustmentHeader produit={produit} />
-
           <AdjustmentTypeSelector value={direction} onChange={setDirection} />
-
           <AdjustmentQuantityInput
             direction={direction}
             value={quantite}
-            onChange={setQuantite}
             error={quantiteError}
           />
-
           <AdjustmentReasonSelector
             direction={direction}
             value={motifType}
             onChange={setMotifType}
             error={motifError}
           />
-
           <StockPreviewCard
             direction={direction}
             stockActuel={stockActuel}
@@ -91,36 +94,42 @@ function AjusterStockFormInner({ produit }: { produit: Produit }) {
           />
         </ScrollView>
 
-        <View style={[styles.footer, { borderTopColor: colors.border, paddingBottom: insets.bottom + 12 }]}>
-          {error ? (
-            <View style={[styles.errorBanner, { backgroundColor: colors.dangerBg }]}>
-              <Ionicons name="alert-circle-outline" size={16} color={colors.danger} />
-              <Text style={[styles.errorText, { color: colors.danger }]}>{error}</Text>
-            </View>
-          ) : null}
+        {/* Error banner */}
+        {error ? (
+          <View style={[styles.errorBanner, { backgroundColor: colors.dangerBg }]}>
+            <Ionicons name="alert-circle-outline" size={16} color={colors.danger} />
+            <Text style={[styles.errorText, { color: colors.danger }]}>{error}</Text>
+          </View>
+        ) : null}
 
-          <TouchableOpacity
+        {/* Custom keyboard or fallback footer */}
+        {keyboardVisible ? (
+          <NumericKeyboard
+            value={quantite}
+            onChange={setQuantite}
+            onConfirm={handlePressValider}
+            confirmLabel={loading ? '…' : 'Valider'}
+            confirmDisabled={loading}
+            safeAreaBottom={insets.bottom}
+          />
+        ) : (
+          <View
             style={[
-              styles.submitBtn,
-              { backgroundColor: colors.primary },
-              !direction && styles.submitBtnDisabled,
+              styles.footer,
+              { borderTopColor: colors.border, paddingBottom: insets.bottom + 12 },
             ]}
-            onPress={handlePressValider}
-            disabled={loading || !direction}
-            activeOpacity={0.85}
-            accessibilityLabel="Valider l'ajustement"
           >
-            {loading ? (
-              <ActivityIndicator color="#fff" size="small" />
-            ) : (
-              <>
-                <Ionicons name="checkmark-circle-outline" size={20} color="#fff" />
-                <Text style={styles.submitText}>Valider l'ajustement</Text>
-              </>
-            )}
-          </TouchableOpacity>
-        </View>
-      </KeyboardAvoidingView>
+            <TouchableOpacity
+              style={[styles.submitBtn, { backgroundColor: colors.primary, opacity: 0.45 }]}
+              disabled
+              accessibilityLabel="Choisir une direction d'abord"
+            >
+              <Ionicons name="checkmark-circle-outline" size={20} color="#fff" />
+              <Text style={styles.submitText}>Valider l'ajustement</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      </View>
 
       <AdjustmentConfirmModal
         visible={confirmVisible}
@@ -138,6 +147,8 @@ function AjusterStockFormInner({ produit }: { produit: Produit }) {
   );
 }
 
+// ── Loader ────────────────────────────────────────────────────────────────────
+
 function AjusterStockLoader({ produitId }: { produitId: string }) {
   const { colors } = useTheme();
   const { produit, loading, error, reload } = useProduitDetail(produitId);
@@ -154,7 +165,10 @@ function AjusterStockLoader({ produitId }: { produitId: string }) {
     return (
       <View style={styles.center}>
         <Text style={{ color: colors.danger }}>{error ?? 'Produit introuvable'}</Text>
-        <TouchableOpacity onPress={reload} style={[styles.retryBtn, { borderColor: colors.border }]}>
+        <TouchableOpacity
+          onPress={reload}
+          style={[styles.retryBtn, { borderColor: colors.border }]}
+        >
           <Text style={{ color: colors.primary, fontWeight: '600' }}>Réessayer</Text>
         </TouchableOpacity>
       </View>
@@ -164,6 +178,8 @@ function AjusterStockLoader({ produitId }: { produitId: string }) {
   return <AjusterStockFormInner produit={produit} />;
 }
 
+// ── Screen ────────────────────────────────────────────────────────────────────
+
 export default function AjusterStockScreen() {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
@@ -171,8 +187,21 @@ export default function AjusterStockScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border, paddingTop: insets.top }]}>
-        <TouchableOpacity style={styles.headerBtn} onPress={() => router.back()} activeOpacity={0.7}>
+      <View
+        style={[
+          styles.header,
+          {
+            backgroundColor: colors.surface,
+            borderBottomColor: colors.border,
+            paddingTop: insets.top,
+          },
+        ]}
+      >
+        <TouchableOpacity
+          style={styles.headerBtn}
+          onPress={() => router.back()}
+          activeOpacity={0.7}
+        >
           <Ionicons name="chevron-back" size={24} color={colors.primary} />
           <Text style={[styles.backLabel, { color: colors.primary }]}>Retour</Text>
         </TouchableOpacity>
@@ -191,7 +220,10 @@ export default function AjusterStockScreen() {
   );
 }
 
+// ── Styles ────────────────────────────────────────────────────────────────────
+
 const styles = StyleSheet.create({
+  flex: { flex: 1 },
   container: { flex: 1 },
 
   header: {
@@ -201,15 +233,32 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
-  headerBtn:   { flexDirection: 'row', alignItems: 'center', minWidth: 80, paddingHorizontal: 8, paddingVertical: 4 },
+  headerBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    minWidth: 80,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
   backLabel:   { fontSize: 16 },
   headerTitle: { flex: 1, textAlign: 'center', fontSize: 16, fontWeight: '700' },
   headerRight: { minWidth: 80 },
 
-  center:   { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24, gap: 12 },
-  retryBtn: { paddingHorizontal: 20, paddingVertical: 8, borderRadius: 8, borderWidth: 1 },
+  center: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+    gap: 12,
+  },
+  retryBtn: {
+    paddingHorizontal: 20,
+    paddingVertical: 8,
+    borderRadius: 8,
+    borderWidth: 1,
+  },
 
-  scrollContent: { padding: 16, gap: 16, paddingBottom: 24 },
+  scrollContent: { padding: 16, gap: 16 },
 
   footer: {
     paddingHorizontal: 16,
@@ -222,7 +271,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
     padding: 12,
+    marginHorizontal: 16,
     borderRadius: 10,
+    marginBottom: 4,
   },
   errorText: { fontSize: 13, flex: 1 },
   submitBtn: {
@@ -233,6 +284,5 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     borderRadius: 14,
   },
-  submitBtnDisabled: { opacity: 0.5 },
   submitText: { color: '#fff', fontSize: 16, fontWeight: '700' },
 });
