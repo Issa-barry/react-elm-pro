@@ -1,4 +1,5 @@
-import { memo, useMemo } from 'react';
+import { Ionicons } from '@expo/vector-icons';
+import { memo, useMemo, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useTheme } from '@/shared/contexts/ThemeContext';
 import {
@@ -22,6 +23,7 @@ export const AdjustmentReasonSelector = memo(function AdjustmentReasonSelector({
   error,
 }: Props) {
   const { colors } = useTheme();
+  const [open, setOpen] = useState(false);
 
   const options = useMemo(() => {
     if (direction === 'augmenter') return MOTIFS_AUGMENTATION;
@@ -29,46 +31,77 @@ export const AdjustmentReasonSelector = memo(function AdjustmentReasonSelector({
     return [];
   }, [direction]);
 
-  const accentColor = direction === 'augmenter' ? colors.success : colors.danger;
-  const accentBg    = direction === 'augmenter' ? colors.successBg : colors.dangerBg;
+  const selectedLabel = options.find(o => o.value === value)?.label ?? '';
+  const disabled      = !direction;
+  const borderColor   = error ? colors.danger : open ? colors.primary : colors.border;
 
-  if (!direction) {
-    return (
-      <View style={[styles.container, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-        <Text style={[styles.placeholder, { color: colors.textMuted }]}>
-          Sélectionnez d'abord une direction…
-        </Text>
-      </View>
-    );
+  function handleSelect(v: MotifAjustementStock) {
+    onChange(v);
+    setOpen(false);
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.surface, borderColor: error ? colors.danger : colors.border }]}>
+    <View style={[styles.container, { backgroundColor: colors.surface, borderColor: colors.border }]}>
       <Text style={[styles.label, { color: colors.text }]}>
         Motif <Text style={{ color: colors.danger }}>*</Text>
       </Text>
-      <View style={styles.chips}>
-        {options.map(opt => {
-          const active = value === opt.value;
-          return (
-            <TouchableOpacity
-              key={opt.value}
-              style={[
-                styles.chip,
-                { borderColor: active ? accentColor : colors.border, backgroundColor: active ? accentBg : colors.surfaceAlt },
-              ]}
-              onPress={() => onChange(opt.value)}
-              activeOpacity={0.7}
-              accessibilityRole="radio"
-              accessibilityState={{ checked: active }}
-            >
-              <Text style={[styles.chipText, { color: active ? accentColor : colors.text, fontWeight: active ? '700' : '500' }]}>
-                {opt.label}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
-      </View>
+
+      {/* Trigger */}
+      <TouchableOpacity
+        style={[
+          styles.trigger,
+          {
+            backgroundColor: disabled ? colors.surfaceAlt : colors.surface,
+            borderColor,
+            opacity: disabled ? 0.5 : 1,
+          },
+        ]}
+        onPress={() => { if (!disabled) setOpen(v => !v); }}
+        activeOpacity={disabled ? 1 : 0.8}
+        accessibilityRole="button"
+        accessibilityLabel="Sélectionner un motif"
+        accessibilityState={{ expanded: open }}
+      >
+        <Text style={[styles.triggerText, { color: value ? colors.text : colors.textMuted }]}>
+          {disabled
+            ? 'Sélectionnez d\'abord une direction…'
+            : selectedLabel || 'Sélectionner un motif…'}
+        </Text>
+        {!disabled && (
+          <Ionicons
+            name={open ? 'chevron-up' : 'chevron-down'}
+            size={18}
+            color={colors.textMuted}
+          />
+        )}
+      </TouchableOpacity>
+
+      {/* Liste déroulante */}
+      {open && !disabled && (
+        <View style={[styles.list, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+          {options.map((opt, idx) => {
+            const active = value === opt.value;
+            return (
+              <TouchableOpacity
+                key={opt.value}
+                style={[
+                  styles.option,
+                  active && { backgroundColor: colors.infoBg },
+                  idx < options.length - 1 && { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.borderLight },
+                ]}
+                onPress={() => handleSelect(opt.value)}
+                activeOpacity={0.7}
+              >
+                <Text style={[styles.optionText, { color: active ? colors.primary : colors.text }]}>
+                  {opt.label}
+                </Text>
+                {active && <Ionicons name="checkmark" size={16} color={colors.primary} />}
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+      )}
+
       {error && (
         <Text style={[styles.errorText, { color: colors.danger }]}>Le motif est obligatoire</Text>
       )}
@@ -81,23 +114,33 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     borderWidth: StyleSheet.hairlineWidth,
     padding: 16,
-    gap: 12,
+    gap: 10,
   },
-  label:       { fontSize: 14, fontWeight: '700' },
-  placeholder: { fontSize: 14, textAlign: 'center', paddingVertical: 8 },
-  chips: {
+  label: { fontSize: 14, fontWeight: '700' },
+  trigger: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 14,
+    minHeight: 48,
   },
-  chip: {
-    paddingHorizontal: 16,
-    paddingVertical: 11,
-    borderRadius: 100,
-    borderWidth: 1.5,
-    minHeight: 44,
-    justifyContent: 'center',
+  triggerText: { fontSize: 14, fontWeight: '500', flex: 1 },
+  list: {
+    borderWidth: 1,
+    borderRadius: 10,
+    overflow: 'hidden',
   },
-  chipText:  { fontSize: 14 },
-  errorText: { fontSize: 12 },
+  option: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 14,
+    paddingVertical: 14,
+    minHeight: 48,
+  },
+  optionText: { fontSize: 14, flex: 1 },
+  errorText:  { fontSize: 12 },
 });
